@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/app/providers/AuthProvider';
+import { signIn, useSession } from 'next-auth/react';
 import { useNotification } from '@/app/providers/NotificationProvider';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 export default function Login() {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { data: session, status } = useSession();
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
     email: '',
@@ -17,10 +17,10 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (status === 'authenticated') {
       router.replace('/dashboard');
     }
-  }, [isAuthenticated, router]);
+  }, [status, router]);
 
   const handleChange = e => {
     setFormData({
@@ -34,31 +34,34 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await res.json();
+      if (!result?.ok) {
+        let errorMessage = 'Failed to sign in';
 
-      if (!data.success) {
-        throw new Error(data.message || 'Login failed');
+        // Handle known error cases
+        if (result.error === 'Invalid credentials') {
+          errorMessage = 'Invalid email or password';
+        } else if (result.error === 'Email and password required') {
+          errorMessage = 'Please provide both email and password';
+        }
+
+        throw new Error(errorMessage);
       }
 
-      login(data.token);
       showNotification('Login successful', 'success');
       router.push('/dashboard');
     } catch (err) {
       showNotification(err.message, 'error');
-    } finally {
       setLoading(false);
     }
   };
 
-  if (isAuthenticated) {
+  if (status === 'authenticated') {
     return <LoadingSpinner message="Redirecting to dashboard..." />;
   }
 

@@ -1,13 +1,13 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useNotification } from "../providers/NotificationProvider";
-import { useAuth } from "../providers/AuthProvider";
-import { useRefreshPosts } from "../hooks/useRefreshPosts";
-import { usePagination } from "../hooks/usePagination";
-import LoadingSpinner from "./LoadingSpinner";
+'use client';
+import { useState, useEffect } from 'react';
+import { useNotification } from '../providers/NotificationProvider';
+import { useRefreshPosts } from '../hooks/useRefreshPosts';
+import { usePagination } from '../hooks/usePagination';
+import LoadingSpinner from './LoadingSpinner';
+import { useSession } from 'next-auth/react';
 
 export default function PostList() {
-  const { token } = useAuth();
+  const { data: session, status } = useSession();
   const { showNotification } = useNotification();
   const { refreshTrigger } = useRefreshPosts();
   const {
@@ -26,19 +26,15 @@ export default function PostList() {
 
   const [posts, setPosts] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [linkedInStatus, setLinkedInStatus] = useState({ isConnected: false, isExpired: false });
+  const [sharingPost, setSharingPost] = useState(null);
 
   const fetchPosts = async () => {
-    if (!token) return;
-
+    if (status !== 'authenticated') return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/posts/get?page=${page}&limit=${limit}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch posts");
+      const res = await fetch(`/api/posts/get?page=${page}&limit=${limit}`);
+      if (!res.ok) throw new Error('Failed to fetch posts');
 
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -46,18 +42,75 @@ export default function PostList() {
       setPosts(data.posts);
       updatePaginationState(data.pagination);
     } catch (error) {
-      showNotification(error.message, "error");
+      showNotification(error.message, 'error');
     } finally {
       setLoading(false);
       setInitialLoad(false);
     }
   };
 
-  // Reset pagination and fetch posts when refresh is triggered
+  const checkLinkedInStatus = async () => {
+    if (status !== 'authenticated') return;
+    try {
+      const res = await fetch('/api/linkedin/status');
+      if (!res.ok) throw new Error('Failed to check LinkedIn status');
+      const data = await res.json();
+      setLinkedInStatus(data);
+    } catch (error) {
+      console.error('Failed to check LinkedIn status:', error);
+    }
+  };
+
+  const connectLinkedIn = async () => {
+    if (status !== 'authenticated') {
+      showNotification('Please login to connect LinkedIn account', 'error');
+      return;
+    }
+    try {
+      const res = await fetch('/api/linkedin/auth');
+      if (!res.ok) throw new Error('Failed to initialize LinkedIn auth');
+      const data = await res.json();
+      window.location.href = data.url;
+    } catch (error) {
+      showNotification('Failed to connect LinkedIn account', 'error');
+    }
+  };
+
+  const shareToLinkedIn = async post => {
+    if (status !== 'authenticated') {
+      showNotification('Please login to share posts', 'error');
+      return;
+    }
+    setSharingPost(post._id);
+    try {
+      const res = await fetch('/api/linkedin/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: post.content }),
+      });
+
+      if (!res.ok) throw new Error('Failed to share post');
+      const data = await res.json();
+
+      if (data.success) {
+        showNotification('Successfully shared to LinkedIn!', 'success');
+      } else {
+        throw new Error(data.error || 'Failed to share post');
+      }
+    } catch (error) {
+      showNotification(error.message, 'error');
+    } finally {
+      setSharingPost(null);
+    }
+  };
+
+  // Reset pagination and fetch posts when refresh is triggered or session changes
   useEffect(() => {
     resetPagination();
     fetchPosts();
-  }, [refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch posts when page changes
   useEffect(() => {
@@ -66,38 +119,73 @@ export default function PostList() {
     }
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (initialLoad) {
+  // Check LinkedIn status on mount and after connecting and when session changes
+  useEffect(() => {
+    if (status === 'authenticated') {
+      checkLinkedInStatus();
+    }
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (status === 'loading' || initialLoad) {
     return <LoadingSpinner message="Loading posts..." />;
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="text-center py-4">
+        <p className="text-gray-400">Please login to view your posts</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
-        <div
-          key={post._id}
-          className="bg-gray-700 p-4 rounded hover:bg-gray-600 transition-colors"
-        >
-          <p className="text-gray-300 mb-2 whitespace-pre-wrap">
-            {post.content}
-          </p>
+      {posts.map(post => (
+        <div key={post._id} className="bg-gray-700 p-4 rounded hover:bg-gray-600 transition-colors">
+          <p className="text-gray-300 mb-2 whitespace-pre-wrap">{post.content}</p>
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-gray-400">
               <span className="mr-4">Topic: {post.topic}</span>
               <span className="mr-4">Tone: {post.tone}</span>
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             </div>
-            {post.keywords?.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post.keywords.map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-4">
+              {post.keywords?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {post.keywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {!linkedInStatus.isConnected ? (
+                <button
+                  onClick={connectLinkedIn}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Connect LinkedIn
+                </button>
+              ) : (
+                <button
+                  onClick={() => shareToLinkedIn(post)}
+                  disabled={sharingPost === post._id}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {sharingPost === post._id ? (
+                    <>
+                      <LoadingSpinner className="w-4 h-4" />
+                      Sharing...
+                    </>
+                  ) : (
+                    'Share to LinkedIn'
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ))}
