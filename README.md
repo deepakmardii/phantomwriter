@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PhantomWriter - AI LinkedIn Post Generator
 
-## Getting Started
+PhantomWriter is a powerful web application that helps professionals maintain a consistent LinkedIn presence by generating high-quality posts using AI. The application offers features like content generation with different tones, subscription management, and post history tracking.
 
-First, run the development server:
+## Features
+
+- 🤖 AI-powered LinkedIn post generation
+- 🎭 Multiple tone options (Professional, Casual, Thought Leadership, Storytelling)
+- 📝 Keyword-based content optimization
+- 💰 Subscription plans with Razorpay integration
+- 📊 Post history and management
+- 🔐 Secure authentication system
+- 🎨 Modern, responsive UI with Tailwind CSS
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 18, Tailwind CSS
+- **Backend**: Node.js, MongoDB
+- **Authentication**: JWT
+- **AI**: Google AI API
+- **Payment**: Razorpay
+- **Testing**: Jest, React Testing Library
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- Node.js 18.x or higher
+- MongoDB
+- npm or yarn
+- Git
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# MongoDB Configuration
+MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/phantomwriter
+
+# JWT Configuration
+JWT_SECRET=your-jwt-secret-key-minimum-32-characters
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID=your-razorpay-key-id
+RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your-razorpay-key-id
+
+# Google AI Configuration
+GOOGLE_AI_API_KEY=your-google-ai-api-key
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/phantomwriter.git
+cd phantomwriter
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - Start the development server
+- `npm run build` - Build the production application
+- `npm start` - Start the production server
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+phantomwriter/
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   ├── components/        # Reusable components
+│   ├── providers/         # Context providers
+│   ├── hooks/             # Custom hooks
+│   └── utils/             # Utility functions
+├── middleware/            # Authentication middleware
+├── models/               # MongoDB models
+├── public/               # Static files
+└── utils/                # Global utility functions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/posts/generate` - Generate new post
+- `GET /api/posts/get` - Get user's posts
+- `POST /api/payment/create-order` - Create payment order
+- `POST /api/payment/verify` - Verify payment
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Next.js team for the amazing framework
+- TailwindCSS for the utility-first CSS framework
+- MongoDB for the database
+- Razorpay for payment integration
+- Google AI for the content generation API
