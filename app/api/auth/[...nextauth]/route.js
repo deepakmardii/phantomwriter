@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/utils/db';
 import User from '@/models/User';
 import { compare } from 'bcryptjs';
@@ -61,9 +62,19 @@ export const authOptions = {
       if (session.user) {
         session.user.id = token.id;
         session.user.subscription = token.subscription;
-        session.accessToken = token.jti; // Include the JWT ID as the access token
+        // Include both the raw JWT token and the token object
+        session.accessToken = token.jti;
+        session.token = jwt.sign(token, process.env.JWT_SECRET);
       }
       return session;
+    },
+    async encode({ secret, token }) {
+      // Use our JWT_SECRET for consistency with our API auth
+      return jwt.sign(token, process.env.JWT_SECRET);
+    },
+    async decode({ secret, token }) {
+      // Use our JWT_SECRET for consistency with our API auth
+      return jwt.verify(token, process.env.JWT_SECRET);
     },
   },
   pages: {

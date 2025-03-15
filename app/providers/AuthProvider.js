@@ -11,7 +11,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     user: session?.user || null,
-    token: session?.accessToken || null,
+    // Get the raw JWT token from the session
+    token: session?.token || session?.accessToken || null,
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'loading',
     logout,
