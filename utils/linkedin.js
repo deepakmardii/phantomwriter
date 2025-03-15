@@ -74,11 +74,71 @@ export async function refreshAccessToken(refreshToken) {
   return response.json();
 }
 
-export async function createPost(accessToken, content) {
+async function uploadImageAsset(accessToken, imageBuffer, imageType) {
+  try {
+    // Register upload
+    const registerUploadResponse = await fetch(`${LINKEDIN_API_URL}/assets?action=registerUpload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        registerUploadRequest: {
+          recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
+          owner: 'urn:li:person:' + (await getUserInfo(accessToken)).sub,
+          serviceRelationships: [
+            {
+              relationshipType: 'OWNER',
+              identifier: 'urn:li:userGeneratedContent',
+            },
+          ],
+        },
+      }),
+    });
+
+    if (!registerUploadResponse.ok) {
+      throw new Error('Failed to register image upload');
+    }
+
+    const {
+      value: { uploadMechanism, asset },
+    } = await registerUploadResponse.json();
+    const { uploadUrl } =
+      uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'];
+
+    // Upload the image
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': imageType,
+      },
+      body: imageBuffer,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    return asset;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+}
+
+export async function createPost(accessToken, content, imageBuffer = null, imageType = null) {
   try {
     // First get profile info from OIDC endpoint to get sub (which is the Person URN)
     const userInfo = await getUserInfo(accessToken);
     const authorUrn = userInfo.sub;
+
+    // Upload image if provided
+    let imageAsset = null;
+    if (imageBuffer && imageType) {
+      imageAsset = await uploadImageAsset(accessToken, imageBuffer, imageType);
+    }
 
     // Create post using UGC Posts API
     const postResponse = await fetch(`${LINKEDIN_API_URL}/ugcPosts`, {
@@ -96,7 +156,18 @@ export async function createPost(accessToken, content) {
             shareCommentary: {
               text: content,
             },
-            shareMediaCategory: 'NONE',
+            shareMediaCategory: imageAsset ? 'IMAGE' : 'NONE',
+            ...(imageAsset && {
+              media: [
+                {
+                  status: 'READY',
+                  description: {
+                    text: 'Image shared with post',
+                  },
+                  media: imageAsset,
+                },
+              ],
+            }),
           },
         },
         visibility: {

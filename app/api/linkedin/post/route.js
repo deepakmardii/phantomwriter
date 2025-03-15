@@ -11,7 +11,10 @@ export async function POST(request) {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const { content } = await request.json();
+    const formData = await request.formData();
+    const content = formData.get('content');
+    const image = formData.get('image');
+
     if (!content) {
       return new Response(JSON.stringify({ error: 'Content is required' }), {
         status: 400,
@@ -19,6 +22,14 @@ export async function POST(request) {
           'Content-Type': 'application/json',
         },
       });
+    }
+
+    let imageBuffer;
+    let imageType;
+    if (image) {
+      const arrayBuffer = await image.arrayBuffer();
+      imageBuffer = Buffer.from(arrayBuffer);
+      imageType = image.type;
     }
 
     await dbConnect();
@@ -59,8 +70,8 @@ export async function POST(request) {
       }
     }
 
-    // Create post on LinkedIn
-    const result = await createPost(linkedInToken.accessToken, content);
+    // Create post on LinkedIn with image if provided
+    const result = await createPost(linkedInToken.accessToken, content, imageBuffer, imageType);
 
     return new Response(JSON.stringify({ success: true, postId: result.id }), {
       status: 200,

@@ -4,6 +4,7 @@ import { useNotification } from '../providers/NotificationProvider';
 import { useRefreshPosts } from '../hooks/useRefreshPosts';
 import { usePagination } from '../hooks/usePagination';
 import LoadingSpinner from './LoadingSpinner';
+import LinkedInShareModal from './LinkedInShareModal';
 import { useSession } from 'next-auth/react';
 
 export default function PostList() {
@@ -28,6 +29,8 @@ export default function PostList() {
   const [initialLoad, setInitialLoad] = useState(true);
   const [linkedInStatus, setLinkedInStatus] = useState({ isConnected: false, isExpired: false });
   const [sharingPost, setSharingPost] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const fetchPosts = async () => {
     if (status !== 'authenticated') return;
@@ -76,19 +79,21 @@ export default function PostList() {
     }
   };
 
-  const shareToLinkedIn = async post => {
+  const handleShareClick = post => {
+    setSelectedPost(post);
+    setShowShareModal(true);
+  };
+
+  const shareToLinkedIn = async formData => {
     if (status !== 'authenticated') {
       showNotification('Please login to share posts', 'error');
       return;
     }
-    setSharingPost(post._id);
+    setSharingPost(selectedPost._id);
     try {
       const res = await fetch('/api/linkedin/post', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: post.content }),
+        body: formData,
       });
 
       if (!res.ok) throw new Error('Failed to share post');
@@ -96,6 +101,8 @@ export default function PostList() {
 
       if (data.success) {
         showNotification('Successfully shared to LinkedIn!', 'success');
+        setShowShareModal(false);
+        setSelectedPost(null);
       } else {
         throw new Error(data.error || 'Failed to share post');
       }
@@ -189,18 +196,11 @@ export default function PostList() {
               )}
               {linkedInStatus.isConnected && (
                 <button
-                  onClick={() => shareToLinkedIn(post)}
+                  onClick={() => handleShareClick(post)}
                   disabled={sharingPost === post._id}
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {sharingPost === post._id ? (
-                    <>
-                      <LoadingSpinner className="w-4 h-4" />
-                      Sharing...
-                    </>
-                  ) : (
-                    'Share to LinkedIn'
-                  )}
+                  Share to LinkedIn
                 </button>
               )}
             </div>
@@ -240,6 +240,18 @@ export default function PostList() {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <LoadingSpinner message="Updating posts..." />
         </div>
+      )}
+
+      {showShareModal && (
+        <LinkedInShareModal
+          post={selectedPost}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedPost(null);
+          }}
+          onShare={shareToLinkedIn}
+          isSharing={sharingPost === selectedPost?._id}
+        />
       )}
     </div>
   );
