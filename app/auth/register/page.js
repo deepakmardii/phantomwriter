@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNotification } from '@/app/providers/NotificationProvider';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 export default function Register() {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
     name: '',
@@ -45,13 +46,23 @@ export default function Register() {
       });
 
       const data = await res.json();
-
       if (!data.success) {
         throw new Error(data.message || 'Registration failed');
       }
 
-      login(data.token);
+      // Sign in with the newly created credentials
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error('Failed to sign in after registration');
+      }
+
       showNotification('Registration successful', 'success');
+      router.push('/dashboard');
       router.push('/dashboard');
     } catch (err) {
       showNotification(err.message, 'error');

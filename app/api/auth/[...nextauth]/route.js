@@ -61,6 +61,7 @@ export const authOptions = {
       if (session.user) {
         session.user.id = token.id;
         session.user.subscription = token.subscription;
+        session.accessToken = token.jti; // Include the JWT ID as the access token
       }
       return session;
     },
