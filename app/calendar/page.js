@@ -30,6 +30,27 @@ export default function CalendarPage() {
         data.posts.map(post => ({
           ...post,
           onEdit: post => setEditingPost(post),
+          onDelete: async post => {
+            if (confirm('Are you sure you want to delete this scheduled post?')) {
+              try {
+                const response = await fetch(`/api/posts/delete?id=${post._id}`, {
+                  method: 'DELETE',
+                  credentials: 'include',
+                });
+
+                if (!response.ok) {
+                  const data = await response.json();
+                  throw new Error(data.error || 'Failed to delete post');
+                }
+
+                // Refresh posts after deletion
+                fetchScheduledPosts();
+              } catch (error) {
+                console.error('Error deleting post:', error);
+                setError(error.message);
+              }
+            }
+          },
         }))
       );
     } catch (error) {
@@ -97,6 +118,18 @@ export default function CalendarPage() {
       if (statusData.isExpired) {
         setError('Your LinkedIn connection has expired. Please reconnect your account.');
         return;
+      }
+
+      // If editing a scheduled post, ensure we preserve the scheduling
+      if (editingPost?.isScheduled && editingPost?.scheduledFor) {
+        if (!formData.get('isScheduled')) {
+          formData.append('isScheduled', 'true');
+          formData.append('scheduledFor', editingPost.scheduledFor);
+          formData.append(
+            'timezone',
+            editingPost.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          );
+        }
       }
 
       const response = await fetch('/api/linkedin/post', {

@@ -33,8 +33,8 @@ export async function GET(request) {
     const scheduled = searchParams.get('scheduled') === 'true';
     if (scheduled) {
       query.isScheduled = true;
-      // Only show future scheduled posts
-      query.scheduledFor = { $gte: new Date() };
+      query.isPublished = false;
+      query.linkedinPostId = { $exists: false }; // Exclude posts that have been shared
     }
 
     const [posts, total] = await Promise.all([

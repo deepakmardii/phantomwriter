@@ -6,10 +6,20 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
   const [content, setContent] = useState(post?.content || '');
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [isScheduling, setIsScheduling] = useState(false);
-  const [scheduleDate, setScheduleDate] = useState('');
-  const [scheduleTime, setScheduleTime] = useState('');
-  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [isScheduling, setIsScheduling] = useState(post?.isScheduled || false);
+  const [scheduleDate, setScheduleDate] = useState(
+    post?.scheduledFor ? new Date(post.scheduledFor).toISOString().split('T')[0] : ''
+  );
+  const [scheduleTime, setScheduleTime] = useState(
+    post?.scheduledFor
+      ? new Date(post.scheduledFor)
+          .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          .padStart(5, '0')
+      : ''
+  );
+  const [timezone, setTimezone] = useState(
+    post?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   const handleImageChange = e => {
     const file = e.target.files[0];
@@ -150,6 +160,9 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                       className="w-full bg-gray-700 text-white rounded p-2"
                       required={isScheduling}
                     />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Please schedule at least 5 minutes in advance
+                    </p>
                   </div>
                 </div>
                 <div className="mb-4">

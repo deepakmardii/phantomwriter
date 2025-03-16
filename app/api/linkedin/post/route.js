@@ -98,9 +98,19 @@ export async function POST(request) {
       const scheduledDate = new Date(
         new Date(scheduledFor).toLocaleString('en-US', { timeZone: timezone })
       );
-      if (scheduledDate <= new Date()) {
+      const now = new Date();
+      const minScheduleTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
+
+      if (scheduledDate <= now) {
         return NextResponse.json(
           { error: 'Scheduled date must be in the future' },
+          { status: 400 }
+        );
+      }
+
+      if (scheduledDate < minScheduleTime) {
+        return NextResponse.json(
+          { error: 'Please schedule at least 5 minutes in advance to ensure proper processing' },
           { status: 400 }
         );
       }
