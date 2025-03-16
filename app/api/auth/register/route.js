@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import connectDB from "@/utils/db";
-import User from "@/models/User";
-import { generateToken } from "@/middleware/auth";
+import { NextResponse } from 'next/server';
+import connectDB from '@/utils/db';
+import User from '@/models/User';
+import { generateToken } from '@/middleware/auth';
 
 export async function POST(request) {
   try {
@@ -13,10 +13,7 @@ export async function POST(request) {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return NextResponse.json(
-        { success: false, message: "User already exists" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'User already exists' }, { status: 400 });
     }
 
     // Create user
@@ -26,7 +23,12 @@ export async function POST(request) {
       password,
       linkedinProfile,
       subscription: {
-        status: "free",
+        status: 'free',
+      },
+      postUsage: {
+        count: 0,
+        monthlyLimit: 50,
+        lastResetDate: new Date(),
       },
     });
 
@@ -45,10 +47,7 @@ export async function POST(request) {
       token,
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+    console.error('Registration error:', error);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }

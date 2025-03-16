@@ -33,6 +33,20 @@ const userSchema = new mongoose.Schema({
       type: Date,
     },
   },
+  postUsage: {
+    count: {
+      type: Number,
+      default: 0,
+    },
+    lastResetDate: {
+      type: Date,
+      default: Date.now,
+    },
+    monthlyLimit: {
+      type: Number,
+      default: 50,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

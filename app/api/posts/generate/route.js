@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
-import { authenticate } from "@/middleware/auth";
-import { generateLinkedInPost } from "@/utils/ai";
-import Post from "@/models/Post";
-import connectDB from "@/utils/db";
+import { NextResponse } from 'next/server';
+import { authenticate } from '@/middleware/auth';
+import { generateLinkedInPost } from '@/utils/ai';
+import Post from '@/models/Post';
+import User from '@/models/User';
+import connectDB from '@/utils/db';
 import {
   successResponse,
   errorResponse,
   withErrorHandling,
   validateRequestBody,
-} from "@/utils/api-helpers";
+} from '@/utils/api-helpers';
 
 export async function POST(request) {
   return withErrorHandling(async () => {
@@ -20,28 +21,29 @@ export async function POST(request) {
 
     // Validate request body
     const body = await request.json();
-    validateRequestBody(body, ["topic", "tone"]);
+    validateRequestBody(body, ['topic', 'tone']);
 
     // Connect to database
     await connectDB();
 
-    // Check user's subscription and post limits
+    // Check subscription and monthly limits
     const user = authRequest.user;
-    if (user.subscription.status === "free") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const lastReset = new Date(user.postUsage.lastResetDate);
 
-      const postsToday = await Post.countDocuments({
-        user: user._id,
-        createdAt: { $gte: today },
-      });
+    // Reset monthly count if it's a new month
+    if (lastReset.getMonth() !== now.getMonth() || lastReset.getFullYear() !== now.getFullYear()) {
+      user.postUsage.count = 0;
+      user.postUsage.lastResetDate = now;
+      await user.save();
+    }
 
-      if (postsToday >= 3) {
-        return errorResponse(
-          "Free tier daily limit reached. Please upgrade your subscription.",
-          403
-        );
-      }
+    // Check if user has reached monthly limit
+    if (user.postUsage.count >= user.postUsage.monthlyLimit) {
+      return errorResponse(
+        `Monthly limit of ${user.postUsage.monthlyLimit} posts reached. Please wait for next month.`,
+        403
+      );
     }
 
     // Generate post content
@@ -53,10 +55,10 @@ export async function POST(request) {
     });
 
     if (!generatedContent.success) {
-      return errorResponse("Failed to generate content", 500);
+      return errorResponse('Failed to generate content', 500);
     }
 
-    // Save post to database
+    // Save post to database and update usage count
     const post = await Post.create({
       user: user._id,
       content: generatedContent.content,
@@ -66,9 +68,14 @@ export async function POST(request) {
       isPublished: false,
     });
 
+    // Increment usage count and save
+    user.postUsage.count += 1;
+    await user.save();
+
     return successResponse({
-      message: "Post generated successfully",
+      message: 'Post generated successfully',
       post,
+      remainingPosts: user.postUsage.monthlyLimit - user.postUsage.count,
     });
-  }, "Failed to generate post");
+  }, 'Failed to generate post');
 }

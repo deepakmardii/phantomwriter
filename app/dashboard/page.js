@@ -1,11 +1,12 @@
-"use client";
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { useNotification } from "@/app/providers/NotificationProvider";
-import { useRefreshPosts } from "@/app/hooks/useRefreshPosts";
-import LoadingSpinner from "@/app/components/LoadingSpinner";
-import PostList from "@/app/components/PostList";
+'use client';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useNotification } from '@/app/providers/NotificationProvider';
+import { useRefreshPosts } from '@/app/hooks/useRefreshPosts';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
+import PostList from '@/app/components/PostList';
+import UsageStats from '@/app/components/UsageStats';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -14,39 +15,39 @@ export default function Dashboard() {
   const { refresh } = useRefreshPosts();
 
   const [formData, setFormData] = useState({
-    topic: "",
-    tone: "professional",
-    keywords: "",
+    topic: '',
+    tone: 'professional',
+    keywords: '',
   });
   const [generatingPost, setGeneratingPost] = useState(false);
 
-  const handleChange = useCallback((e) => {
-    setFormData((prev) => ({
+  const handleChange = useCallback(e => {
+    setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setGeneratingPost(true);
 
     try {
       if (!token) {
-        throw new Error("No authentication token found");
+        throw new Error('No authentication token found');
       }
 
-      const res = await fetch("/api/posts/generate", {
-        method: "POST",
+      const res = await fetch('/api/posts/generate', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...formData,
           keywords: formData.keywords
-            .split(",")
-            .map((k) => k.trim())
+            .split(',')
+            .map(k => k.trim())
             .filter(Boolean),
         }),
       });
@@ -54,23 +55,27 @@ export default function Dashboard() {
       const data = await res.json();
 
       if (!data.success) {
-        throw new Error(data.message || "Failed to generate post");
+        throw new Error(data.message || 'Failed to generate post');
       }
 
-      showNotification("Post generated successfully", "success");
+      showNotification(
+        `Post generated successfully! ${data.remainingPosts} posts remaining this month.`,
+        'success'
+      );
       setFormData({
-        topic: "",
-        tone: "professional",
-        keywords: "",
+        topic: '',
+        tone: 'professional',
+        keywords: '',
       });
 
-      // Refresh the posts list
+      // Refresh the posts list and usage stats
       refresh();
+      window.dispatchEvent(new CustomEvent('refreshUsageStats'));
     } catch (err) {
-      console.error("Error generating post:", err);
-      showNotification(err.message, "error");
-      if (err.message === "No authentication token found") {
-        router.push("/auth/login");
+      console.error('Error generating post:', err);
+      showNotification(err.message, 'error');
+      if (err.message === 'No authentication token found') {
+        router.push('/auth/login');
       }
     } finally {
       setGeneratingPost(false);
@@ -89,15 +94,12 @@ export default function Dashboard() {
             <div className="text-xl font-bold text-white">PhantomWriter</div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.push("/subscription")}
+                onClick={() => router.push('/subscription')}
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 Subscription
               </button>
-              <button
-                onClick={logout}
-                className="text-gray-300 hover:text-white transition-colors"
-              >
+              <button onClick={logout} className="text-gray-300 hover:text-white transition-colors">
                 Sign out
               </button>
             </div>
@@ -106,17 +108,15 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Usage Stats */}
+        <UsageStats />
+
         {/* Generate Post Form */}
         <div className="bg-gray-800 px-4 py-5 rounded-lg shadow sm:p-6 mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">
-            Generate New Post
-          </h2>
+          <h2 className="text-xl font-bold text-white mb-4">Generate New Post</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="topic"
-                className="block text-sm font-medium text-gray-300"
-              >
+              <label htmlFor="topic" className="block text-sm font-medium text-gray-300">
                 Topic
               </label>
               <input
@@ -133,10 +133,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <label
-                htmlFor="tone"
-                className="block text-sm font-medium text-gray-300"
-              >
+              <label htmlFor="tone" className="block text-sm font-medium text-gray-300">
                 Tone
               </label>
               <select
@@ -155,10 +152,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <label
-                htmlFor="keywords"
-                className="block text-sm font-medium text-gray-300"
-              >
+              <label htmlFor="keywords" className="block text-sm font-medium text-gray-300">
                 Keywords (comma separated)
               </label>
               <input
@@ -184,7 +178,7 @@ export default function Dashboard() {
                   Generating...
                 </div>
               ) : (
-                "Generate Post"
+                'Generate Post'
               )}
             </button>
           </form>
