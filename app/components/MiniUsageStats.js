@@ -37,7 +37,7 @@ export default function MiniUsageStats() {
 
   return (
     <div className="px-4 py-2 text-sm">
-      <div className="flex items-center justify-between text-gray-400">
+      <div className="flex items-center justify-between text-gray-600">
         <span>{remainingPosts} posts remaining</span>
         <span className="capitalize">{subscription.status}</span>
       </div>

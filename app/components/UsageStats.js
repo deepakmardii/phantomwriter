@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import LoadingSpinner from './LoadingSpinner';
+import Link from 'next/link';
 
 export default function UsageStats() {
   const { data: session } = useSession();
@@ -51,28 +52,28 @@ export default function UsageStats() {
   nextResetDate.setMonth(nextResetDate.getMonth() + 1);
 
   return (
-    <div className="bg-gray-800 px-4 py-5 rounded-lg shadow sm:p-6 mb-6">
-      <h2 className="text-xl font-bold text-white mb-4">Usage Statistics</h2>
+    <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6 mb-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Usage Statistics</h2>
 
       <div className="space-y-4">
         <div>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-300">
+            <span className="text-gray-700">
               Posts Generated: {postUsage.count} / {postUsage.monthlyLimit}
             </span>
-            <span className="text-gray-400 text-sm">
+            <span className="text-gray-600 text-sm">
               {postUsage.monthlyLimit - postUsage.count} remaining
             </span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-2.5">
+          <div className="w-full bg-gray-100 rounded-full h-2.5">
             <div
-              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+              className="bg-orange-500 h-2.5 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(usagePercentage, 100)}%` }}
             />
           </div>
         </div>
 
-        <div className="flex justify-between text-sm text-gray-400">
+        <div className="flex justify-between text-sm text-gray-600">
           <span>Next Reset: {nextResetDate.toLocaleDateString()}</span>
           <span>
             Plan: {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
@@ -81,12 +82,12 @@ export default function UsageStats() {
 
         {subscription.status === 'free' && (
           <div className="mt-4 text-center">
-            <a
+            <Link
               href="/subscription"
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              className="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               Upgrade Plan
-            </a>
+            </Link>
           </div>
         )}
       </div>

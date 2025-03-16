@@ -143,7 +143,7 @@ export default function PostList() {
   if (status === 'unauthenticated') {
     return (
       <div className="text-center py-4">
-        <p className="text-gray-400">Please login to view your posts</p>
+        <p className="text-gray-600">Please login to view your posts</p>
       </div>
     );
   }
@@ -151,16 +151,16 @@ export default function PostList() {
   return (
     <div className="space-y-4">
       {!linkedInStatus.isConnected && (
-        <div className="bg-gray-700 p-4 rounded mb-4 flex items-center justify-between">
+        <div className="bg-white border border-gray p-4 rounded-lg mb-4 flex items-center justify-between shadow-sm">
           <div>
-            <h3 className="text-white font-medium">Connect LinkedIn Account</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-gray-800 font-medium">Connect LinkedIn Account</h3>
+            <p className="text-gray-600 text-sm">
               Connect your LinkedIn account to share posts directly to your feed
             </p>
           </div>
           <button
             onClick={connectLinkedIn}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -176,10 +176,13 @@ export default function PostList() {
       )}
 
       {posts.map(post => (
-        <div key={post._id} className="bg-gray-700 p-4 rounded hover:bg-gray-600 transition-colors">
-          <p className="text-gray-300 mb-2 whitespace-pre-wrap">{post.content}</p>
+        <div
+          key={post._id}
+          className="bg-white p-4 rounded-lg border border-gray hover:shadow-lg transition-all"
+        >
+          <p className="text-gray-700 mb-2 whitespace-pre-wrap">{post.content}</p>
           <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-400">
+            <div className="flex items-center text-sm text-gray-600">
               <span className="mr-4">Topic: {post.topic}</span>
               <span className="mr-4">Tone: {post.tone}</span>
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
@@ -190,7 +193,7 @@ export default function PostList() {
                   {post.keywords.map((keyword, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300"
+                      className="px-2 py-1 bg-orange-500 bg-opacity-10 rounded-full text-xs text-orange-600"
                     >
                       {keyword}
                     </span>
@@ -201,7 +204,7 @@ export default function PostList() {
                 <button
                   onClick={() => handleShareClick(post)}
                   disabled={sharingPost === post._id}
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Share to LinkedIn
                 </button>
@@ -212,7 +215,7 @@ export default function PostList() {
       ))}
 
       {posts.length === 0 && !loading && (
-        <p className="text-gray-400 text-center py-4">
+        <p className="text-gray-600 text-center py-4">
           No posts generated yet. Create your first post above!
         </p>
       )}
@@ -222,17 +225,17 @@ export default function PostList() {
           <button
             onClick={previousPage}
             disabled={page === 1 || loading}
-            className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
           >
             Previous
           </button>
-          <span className="text-gray-400">
+          <span className="text-gray-600">
             Page {page} of {totalPages} ({total} posts)
           </span>
           <button
             onClick={nextPage}
             disabled={!hasMore || loading}
-            className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
           >
             Next
           </button>
@@ -240,7 +243,7 @@ export default function PostList() {
       )}
 
       {loading && !initialLoad && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
           <LoadingSpinner message="Updating posts..." />
         </div>
       )}

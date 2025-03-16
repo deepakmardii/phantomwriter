@@ -1,34 +1,36 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  mode: "jit",
-  darkMode: "class",
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  mode: 'jit',
+  darkMode: 'class',
+  content: ['./app/**/*.{js,ts,jsx,tsx,mdx}', './components/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
-        background: "rgb(var(--background-start-rgb))",
-        foreground: "rgb(var(--foreground-rgb))",
+        background: 'rgb(var(--background-start-rgb))',
+        foreground: 'rgb(var(--foreground-rgb))',
+        orange: {
+          500: 'rgb(249, 115, 22)',
+          600: 'rgb(234, 88, 12)',
+          700: 'rgb(194, 65, 12)',
+        },
       },
       backgroundColor: {
-        "gray-700": "rgb(55, 65, 81)",
-        "gray-800": "rgb(31, 41, 55)",
-        "gray-900": "rgb(17, 24, 39)",
-        "blue-500": "rgb(59, 130, 246)",
-        "blue-600": "rgb(37, 99, 235)",
-        "blue-700": "rgb(29, 78, 216)",
+        white: 'rgb(255, 255, 255)',
+        'orange-500': 'rgb(249, 115, 22)',
+        'orange-600': 'rgb(234, 88, 12)',
+        'orange-700': 'rgb(194, 65, 12)',
       },
       borderColor: {
-        "gray-600": "rgb(75, 85, 99)",
-        "gray-700": "rgb(55, 65, 81)",
-        "blue-500": "rgb(59, 130, 246)",
+        'orange-500': 'rgb(249, 115, 22)',
+        'orange-600': 'rgb(234, 88, 12)',
+        gray: 'rgb(229, 231, 235)',
       },
       textColor: {
-        "gray-300": "rgb(209, 213, 219)",
-        "gray-400": "rgb(156, 163, 175)",
-        white: "rgb(255, 255, 255)",
+        'gray-600': 'rgb(75, 85, 99)',
+        'gray-700': 'rgb(55, 65, 81)',
+        'gray-800': 'rgb(31, 41, 55)',
+        'orange-500': 'rgb(249, 115, 22)',
+        'orange-600': 'rgb(234, 88, 12)',
       },
     },
   },

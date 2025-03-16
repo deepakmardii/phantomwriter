@@ -110,7 +110,7 @@ export default function Subscription() {
           email: 'user@example.com',
         },
         theme: {
-          color: '#2563EB',
+          color: '#f97316', // orange-500
         },
       };
 
@@ -124,70 +124,74 @@ export default function Subscription() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <nav className="bg-gray-800 border-b border-gray-700">
+    <div className="min-h-screen bg-white">
+      {/* <nav className="bg-white border-b border-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="text-xl font-bold text-white">PhantomWriter</div>
+            <div className="text-xl font-bold text-gray-800">PhantomWriter</div>
             <button
               onClick={() => router.push('/dashboard')}
-              className="text-gray-300 hover:text-white"
+              className="text-gray-600 hover:text-gray-800"
             >
               Back to Dashboard
             </button>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-gray-800 rounded-lg shadow px-5 py-6 sm:px-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray px-5 py-6 sm:px-6">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-extrabold text-white mb-4">
+              <h2 className="text-4xl font-extrabold text-gray-800 mb-4">
                 Ready to Supercharge Your LinkedIn Presence?
               </h2>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Choose your plan and start generating engaging LinkedIn content with AI today. Save
                 50% with yearly billing!
               </p>
             </div>
 
-            {error && <div className="bg-red-600 text-white p-3 rounded mb-6">{error}</div>}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg mb-6">
+                {error}
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => (
                 <div
                   key={key}
-                  className={`bg-gray-700 rounded-lg p-6 cursor-pointer border-2 ${
-                    selectedPlan === key ? 'border-blue-500' : 'border-transparent'
+                  className={`bg-white rounded-lg p-6 cursor-pointer border-2 shadow-sm ${
+                    selectedPlan === key ? 'border-orange-500' : 'border-gray'
                   }`}
                   onClick={() => setSelectedPlan(key)}
                 >
-                  <h3 className="text-xl font-bold text-white mb-4">{plan.name}</h3>
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">{plan.name}</h3>
                   <div className="mb-4">
-                    <p className="text-5xl font-extrabold text-white">
+                    <p className="text-5xl font-extrabold text-gray-800">
                       ${plan.price}
-                      <span className="text-xl text-gray-400">
+                      <span className="text-xl text-gray-600">
                         {key === 'monthly' ? '/month' : '/year'}
                       </span>
                     </p>
                     {plan.savings && (
                       <div className="mt-2">
-                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                           {plan.savings}
                         </span>
                       </div>
                     )}
                     {key === 'yearly' && (
-                      <p className="text-gray-400 text-sm mt-2">
+                      <p className="text-gray-600 text-sm mt-2">
                         That&apos;s just ${Math.round(plan.price / 12)}/month, billed annually
                       </p>
                     )}
                   </div>
-                  <ul className="text-gray-300 space-y-3 mb-6">
+                  <ul className="text-gray-600 space-y-3 mb-6">
                     <li className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 mr-2"
+                        className="h-6 w-6 text-orange-500 mr-2"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -203,7 +207,7 @@ export default function Subscription() {
                     </li>
                     <li className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 mr-2"
+                        className="h-6 w-6 text-orange-500 mr-2"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -235,7 +239,7 @@ export default function Subscription() {
                     </li>
                     <li className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 mr-2"
+                        className="h-6 w-6 text-orange-500 mr-2"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -251,7 +255,7 @@ export default function Subscription() {
                     </li>
                     <li className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 mr-2"
+                        className="h-6 w-6 text-orange-500 mr-2"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -267,7 +271,7 @@ export default function Subscription() {
                     </li>
                     <li className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 mr-2"
+                        className="h-6 w-6 text-orange-500 mr-2"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -285,7 +289,7 @@ export default function Subscription() {
                   <button
                     onClick={handleSubscription}
                     disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   >
                     {loading ? 'Processing...' : `Choose ${plan.name}`}
                   </button>

@@ -57,11 +57,11 @@ export default function PostCalendar({ posts }) {
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg">
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray">
       <div className="flex justify-between items-center mb-6">
-        <button onClick={prevMonth} className="p-2 hover:bg-gray-700 rounded">
+        <button onClick={prevMonth} className="p-2 hover:bg-gray-50 rounded-lg">
           <svg
-            className="w-6 h-6 text-gray-400"
+            className="w-6 h-6 text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -74,12 +74,12 @@ export default function PostCalendar({ posts }) {
             />
           </svg>
         </button>
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-gray-800">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h2>
-        <button onClick={nextMonth} className="p-2 hover:bg-gray-700 rounded">
+        <button onClick={nextMonth} className="p-2 hover:bg-gray-50 rounded-lg">
           <svg
-            className="w-6 h-6 text-gray-400"
+            className="w-6 h-6 text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ export default function PostCalendar({ posts }) {
 
       <div className="grid grid-cols-7 gap-2 mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-center text-gray-400 font-medium py-2">
+          <div key={day} className="text-center text-gray-600 font-medium py-2">
             {day}
           </div>
         ))}
@@ -99,7 +99,10 @@ export default function PostCalendar({ posts }) {
 
       <div className="grid grid-cols-7 gap-2">
         {[...Array(firstDayOfMonth)].map((_, index) => (
-          <div key={`empty-${index}`} className="h-24 bg-gray-700/50 rounded"></div>
+          <div
+            key={`empty-${index}`}
+            className="h-24 bg-gray-50 rounded-lg border border-gray"
+          ></div>
         ))}
 
         {[...Array(daysInMonth)].map((_, index) => {
@@ -107,21 +110,24 @@ export default function PostCalendar({ posts }) {
           const dayPosts = getDayPosts(day);
 
           return (
-            <div key={day} className="h-24 bg-gray-700 rounded p-2 overflow-y-auto relative">
-              <div className="text-gray-400 mb-1 flex items-center">
+            <div
+              key={day}
+              className="h-24 bg-white rounded-lg p-2 overflow-y-auto relative border border-gray hover:shadow-sm transition-shadow"
+            >
+              <div className="text-gray-600 mb-1 flex items-center">
                 {day}
-                {isToday(day) && <div className="w-2 h-2 rounded-full bg-blue-500 ml-2"></div>}
+                {isToday(day) && <div className="w-2 h-2 rounded-full bg-orange-500 ml-2"></div>}
               </div>
               {dayPosts.map(post => (
                 <div
                   key={post._id}
-                  className="bg-blue-600/20 p-2 rounded mb-1 text-sm text-white hover:bg-blue-600/30 transition-colors"
+                  className="bg-orange-500/10 p-2 rounded-lg mb-1 text-sm text-gray-700 hover:bg-orange-500/20 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-1">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3"
+                        className="h-3 w-3 text-orange-500"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -131,7 +137,7 @@ export default function PostCalendar({ posts }) {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-600">
                         {new Date(post.scheduledFor).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',

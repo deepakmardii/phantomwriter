@@ -18,22 +18,16 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-screen w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+    <nav className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray flex flex-col shadow-lg">
       {/* Logo, Name, and Stats Section */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-gray">
         <div className="flex items-center justify-center mb-4">
-          <Image
-            src="/globe.svg"
-            alt="PhantomWriter Logo"
-            width={40}
-            height={40}
-            className="dark:invert"
-          />
+          <Image src="/globe.svg" alt="PhantomWriter Logo" width={40} height={40} />
         </div>
-        <h1 className="text-xl font-semibold text-center text-white">PhantomWriter</h1>
+        <h1 className="text-xl font-semibold text-center text-gray-800">PhantomWriter</h1>
         {user && (
           <>
-            <p className="mt-2 text-sm text-center text-gray-400">Welcome, {user.name || 'User'}</p>
+            <p className="mt-2 text-sm text-center text-gray-600">Welcome, {user.name || 'User'}</p>
             <MiniUsageStats />
           </>
         )}
@@ -46,8 +40,8 @@ export default function Navbar() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center px-4 py-2 rounded-lg text-white hover:bg-gray-700 transition-colors ${
-                  pathname === item.href ? 'bg-gray-700' : ''
+                className={`flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-orange-500 hover:text-white transition-colors ${
+                  pathname === item.href ? 'bg-orange-500 text-white' : ''
                 }`}
               >
                 <span className="mr-3">{item.icon}</span>
@@ -59,8 +53,8 @@ export default function Navbar() {
       </div>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-gray-700">
-        <div className="text-xs text-center text-gray-400 mb-4">
+      <div className="p-4 border-t border-gray">
+        <div className="text-xs text-center text-gray-600 mb-4">
           © 2024 PhantomWriter
           <br />
           All rights reserved

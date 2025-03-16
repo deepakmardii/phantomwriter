@@ -182,26 +182,26 @@ export default function CalendarPage() {
   if (status === 'unauthenticated') {
     return (
       <div className="text-center py-4">
-        <p className="text-gray-400">Please login to view scheduled posts</p>
+        <p className="text-gray-600">Please login to view scheduled posts</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Scheduled Posts</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Scheduled Posts</h1>
 
       {!linkedInStatus.isConnected && (
-        <div className="bg-gray-700 p-4 rounded mb-6 flex items-center justify-between">
+        <div className="bg-white p-4 rounded-lg mb-6 flex items-center justify-between border border-gray shadow-sm">
           <div>
-            <h3 className="text-white font-medium">Connect LinkedIn Account</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-gray-800 font-medium">Connect LinkedIn Account</h3>
+            <p className="text-gray-600 text-sm">
               Connect your LinkedIn account to share scheduled posts directly to your feed
             </p>
           </div>
           <button
             onClick={connectLinkedIn}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +217,7 @@ export default function CalendarPage() {
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded mb-6 flex items-center">
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 flex items-center">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

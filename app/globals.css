@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 17, 24, 39;
-  --background-end-rgb: 17, 24, 39;
+  --foreground-rgb: 31, 41, 55;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
 }
 
 body {
@@ -18,7 +18,7 @@ body {
   input,
   select,
   textarea {
-    @apply bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    @apply bg-white border border-gray rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
   }
 
   button {
@@ -32,11 +32,11 @@ body {
 
 @layer components {
   .card {
-    @apply bg-gray-800 rounded-lg shadow-lg p-6;
+    @apply bg-white rounded-lg shadow-lg p-6 border border-gray;
   }
 
   .hover-card {
-    @apply transform transition-transform duration-200 hover:-translate-y-1;
+    @apply transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl;
   }
 }
 

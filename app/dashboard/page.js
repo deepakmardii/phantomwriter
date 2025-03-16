@@ -181,16 +181,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column - Generate Post Form */}
           <div className="lg:w-1/2">
-            <div className="bg-gray-800 px-4 py-5 rounded-lg shadow sm:p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Generate New Post</h2>
+            <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Generate New Post</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="topic" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
                     Topic
                   </label>
                   <input
@@ -201,13 +201,13 @@ export default function Dashboard() {
                     onChange={handleChange}
                     required
                     disabled={generatingPost}
-                    className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="mt-1 block w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     placeholder="E.g., Leadership in tech, Remote work challenges"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="tone" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="tone" className="block text-sm font-medium text-gray-700">
                     Tone
                   </label>
                   <select
@@ -216,7 +216,7 @@ export default function Dashboard() {
                     value={formData.tone}
                     onChange={handleChange}
                     disabled={generatingPost}
-                    className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="mt-1 block w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   >
                     <option value="professional">Professional</option>
                     <option value="casual">Casual</option>
@@ -226,7 +226,7 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label htmlFor="keywords" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="keywords" className="block text-sm font-medium text-gray-700">
                     Keywords (comma separated)
                   </label>
                   <input
@@ -236,7 +236,7 @@ export default function Dashboard() {
                     value={formData.keywords}
                     onChange={handleChange}
                     disabled={generatingPost}
-                    className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="mt-1 block w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     placeholder="E.g., innovation, leadership, technology"
                   />
                 </div>
@@ -244,7 +244,7 @@ export default function Dashboard() {
                 <button
                   type="submit"
                   disabled={generatingPost}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {generatingPost ? (
                     <div className="flex items-center">
@@ -261,19 +261,19 @@ export default function Dashboard() {
 
           {/* Right Column - Current Post & Actions */}
           <div className="lg:w-1/2">
-            <div className="bg-gray-800 px-4 py-5 rounded-lg shadow sm:p-6 h-full">
-              <h2 className="text-xl font-bold text-white mb-4">Generated Post</h2>
+            <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6 h-full">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Generated Post</h2>
               {!linkedInStatus.isConnected && (
-                <div className="bg-gray-700 p-4 rounded mb-4 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-lg mb-4 flex items-center justify-between border border-gray">
                   <div>
-                    <h3 className="text-white font-medium">Connect LinkedIn Account</h3>
-                    <p className="text-gray-400 text-sm">
+                    <h3 className="text-gray-800 font-medium">Connect LinkedIn Account</h3>
+                    <p className="text-gray-600 text-sm">
                       Connect your LinkedIn account to share posts directly to your feed
                     </p>
                   </div>
                   <button
                     onClick={connectLinkedIn}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -289,13 +289,13 @@ export default function Dashboard() {
               )}
               {currentPost ? (
                 <div className="space-y-4">
-                  <div className="bg-gray-700 p-4 rounded">
-                    <p className="text-gray-300 whitespace-pre-wrap mb-4">{currentPost.content}</p>
+                  <div className="bg-white p-4 rounded-lg border border-gray">
+                    <p className="text-gray-700 whitespace-pre-wrap mb-4">{currentPost.content}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {currentPost.keywords?.map((keyword, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300"
+                          className="px-2 py-1 bg-orange-500/10 rounded-full text-xs text-orange-600"
                         >
                           {keyword}
                         </span>
@@ -305,14 +305,14 @@ export default function Dashboard() {
                       <div className="flex flex-wrap gap-3">
                         <button
                           onClick={handleCopy}
-                          className="flex-1 py-2 px-4 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors"
+                          className="flex-1 py-2 px-4 border border-gray text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           Copy to Clipboard
                         </button>
                         {linkedInStatus.isConnected && (
                           <button
                             onClick={() => setShowShareModal(true)}
-                            className="flex-1 py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            className="flex-1 py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                           >
                             Share to LinkedIn
                           </button>
@@ -321,7 +321,7 @@ export default function Dashboard() {
                       <div>
                         <label
                           htmlFor="improvements"
-                          className="block text-sm font-medium text-gray-300 mb-2"
+                          className="block text-sm font-medium text-gray-700 mb-2"
                         >
                           Improvements needed
                         </label>
@@ -330,13 +330,13 @@ export default function Dashboard() {
                           value={improvements}
                           onChange={e => setImprovements(e.target.value)}
                           placeholder="Describe what improvements you want in the regenerated post..."
-                          className="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors mb-3"
+                          className="w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors mb-3"
                           rows={2}
                         />
                         <button
                           onClick={handleRegenerate}
                           disabled={generatingPost}
-                          className="w-full py-2 px-4 bg-yellow-600 text-white rounded hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {generatingPost ? 'Generating...' : 'Not happy? Generate again'}
                         </button>
@@ -345,7 +345,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-gray-600">
                   Generated post will appear here
                 </div>
               )}

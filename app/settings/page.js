@@ -12,9 +12,9 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
 
         <div className="space-y-6">
           {/* Usage Statistics Section */}
@@ -22,7 +22,7 @@ export default function Settings() {
 
           {/* LinkedIn Settings Section */}
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Social Media</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Social Media</h2>
             <LinkedInSettings />
           </div>
         </div>

@@ -67,15 +67,15 @@ export default function LinkedInSettings() {
   }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold text-white mb-4">LinkedIn Connection</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">LinkedIn Connection</h2>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
           {error}
           <button
             onClick={() => setError(null)}
-            className="float-right text-red-500 hover:text-red-400"
+            className="float-right text-red-600 hover:text-red-500"
           >
             ✕
           </button>
@@ -84,15 +84,15 @@ export default function LinkedInSettings() {
 
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-300">
+          <p className="text-gray-700">
             Status:{' '}
             <span
               className={`font-medium ${
                 status.isConnected
                   ? status.isExpired
-                    ? 'text-yellow-500'
-                    : 'text-green-500'
-                  : 'text-red-500'
+                    ? 'text-yellow-600'
+                    : 'text-green-600'
+                  : 'text-red-600'
               }`}
             >
               {status.isConnected
@@ -103,7 +103,7 @@ export default function LinkedInSettings() {
             </span>
           </p>
           {status.isConnected && (
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Your posts can be shared directly to LinkedIn
             </p>
           )}
@@ -111,10 +111,10 @@ export default function LinkedInSettings() {
 
         <button
           onClick={status.isConnected ? disconnectLinkedIn : connectLinkedIn}
-          className={`px-4 py-2 rounded transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
             status.isConnected
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              ? 'bg-red-500 hover:bg-red-600 text-white'
+              : 'bg-orange-500 hover:bg-orange-600 text-white'
           }`}
         >
           {status.isConnected ? (

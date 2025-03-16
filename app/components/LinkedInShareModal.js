@@ -73,11 +73,15 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-2xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl text-white font-semibold">Share to LinkedIn</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white" disabled={isSharing}>
+          <h2 className="text-xl text-gray-800 font-semibold">Share to LinkedIn</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-600 hover:text-gray-800"
+            disabled={isSharing}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -99,23 +103,23 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            className="w-full bg-gray-700 text-white rounded p-3 min-h-[150px] mb-4"
+            className="w-full bg-white border border-gray rounded-lg p-3 min-h-[150px] mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             placeholder="Write your post content..."
             disabled={isSharing}
           />
 
           <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-2">Attach Image (optional)</label>
+            <label className="block text-sm text-gray-600 mb-2">Attach Image (optional)</label>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="block w-full text-sm text-gray-400
+              className="block w-full text-sm text-gray-600
                 file:mr-4 file:py-2 file:px-4
-                file:rounded file:border-0
+                file:rounded-lg file:border-0
                 file:text-sm file:font-semibold
-                file:bg-blue-600 file:text-white
-                hover:file:bg-blue-700
+                file:bg-orange-500 file:text-white
+                hover:file:bg-orange-600
                 file:cursor-pointer"
               disabled={isSharing}
             />
@@ -127,12 +131,12 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
           </div>
 
           <div className="mb-4">
-            <label className="flex items-center text-gray-400 mb-4">
+            <label className="flex items-center text-gray-700 mb-4">
               <input
                 type="checkbox"
                 checked={isScheduling}
                 onChange={e => setIsScheduling(e.target.checked)}
-                className="mr-2 rounded bg-gray-700 border-gray-600"
+                className="mr-2 rounded border-gray accent-orange-500"
               />
               Schedule this post
             </label>
@@ -141,26 +145,26 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
               <>
                 <div className="flex gap-4 mb-4">
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-400 mb-2">Date</label>
+                    <label className="block text-sm text-gray-600 mb-2">Date</label>
                     <input
                       type="date"
                       value={scheduleDate}
                       onChange={e => setScheduleDate(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-gray-700 text-white rounded p-2"
+                      className="w-full bg-white border border-gray rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       required={isScheduling}
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-400 mb-2">Time</label>
+                    <label className="block text-sm text-gray-600 mb-2">Time</label>
                     <input
                       type="time"
                       value={scheduleTime}
                       onChange={e => setScheduleTime(e.target.value)}
-                      className="w-full bg-gray-700 text-white rounded p-2"
+                      className="w-full bg-white border border-gray rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       required={isScheduling}
                     />
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-600 mt-1">
                       Please schedule at least 5 minutes in advance
                     </p>
                   </div>
@@ -170,7 +174,7 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                   <select
                     value={timezone}
                     onChange={e => setTimezone(e.target.value)}
-                    className="w-full bg-gray-700 text-white rounded p-2"
+                    className="w-full bg-white border border-gray rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     required={isScheduling}
                   >
                     {Intl.supportedValuesOf('timeZone').map(tz => (
@@ -188,14 +192,14 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 border border-gray text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               disabled={isSharing}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSharing || (isScheduling && (!scheduleDate || !scheduleTime))}
             >
               {isSharing ? (
