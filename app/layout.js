@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import Providers from './providers/Providers';
+import Navbar from './components/Navbar';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -28,7 +29,12 @@ export default function RootLayout({ children }) {
             };`,
           }}
         />
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex">
+            <Navbar />
+            <main className="flex-1 ml-64 min-h-screen">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
