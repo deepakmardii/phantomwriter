@@ -94,18 +94,21 @@ export default function PostList() {
       const res = await fetch('/api/linkedin/post', {
         method: 'POST',
         body: formData,
+        headers: {
+          Accept: 'application/json',
+        },
+        credentials: 'include',
       });
 
-      if (!res.ok) throw new Error('Failed to share post');
       const data = await res.json();
 
-      if (data.success) {
-        showNotification('Successfully shared to LinkedIn!', 'success');
-        setShowShareModal(false);
-        setSelectedPost(null);
-      } else {
+      if (!res.ok) {
         throw new Error(data.error || 'Failed to share post');
       }
+
+      showNotification('Successfully shared to LinkedIn!', 'success');
+      setShowShareModal(false);
+      setSelectedPost(null);
     } catch (error) {
       showNotification(error.message, 'error');
     } finally {

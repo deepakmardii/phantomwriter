@@ -1,24 +1,24 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
   content: {
     type: String,
-    required: [true, "Post content is required"],
-    maxlength: [3000, "Post cannot be more than 3000 characters"],
+    required: [true, 'Post content is required'],
+    maxlength: [3000, 'Post cannot be more than 3000 characters'],
   },
   topic: {
     type: String,
-    required: [true, "Topic is required"],
+    required: [true, 'Topic is required'],
   },
   tone: {
     type: String,
-    enum: ["professional", "casual", "thought-leadership", "storytelling"],
-    default: "professional",
+    enum: ['professional', 'casual', 'thought-leadership', 'storytelling'],
+    default: 'professional',
   },
   keywords: [
     {
@@ -34,6 +34,13 @@ const postSchema = new mongoose.Schema({
   },
   linkedinPostId: {
     type: String,
+  },
+  scheduledFor: {
+    type: Date,
+  },
+  isScheduled: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,
@@ -55,6 +62,6 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
 export default Post;

@@ -101,7 +101,7 @@ export async function GET(request) {
     // Save token and user info to database
     await dbConnect();
     await LinkedInToken.findOneAndUpdate(
-      { userId: session.user.id },
+      { user: session.user.id },
       {
         accessToken: tokenData.access_token,
         refreshToken: tokenData.refresh_token,

@@ -26,9 +26,23 @@ export async function GET(request) {
     const limit = Number(searchParams.get('limit')) || 20;
     const skip = (page - 1) * limit;
 
+    // Build query based on parameters
+    const query = { user: session.user.id };
+
+    // Check for scheduled posts filter
+    const scheduled = searchParams.get('scheduled') === 'true';
+    if (scheduled) {
+      query.isScheduled = true;
+      // Only show future scheduled posts
+      query.scheduledFor = { $gte: new Date() };
+    }
+
     const [posts, total] = await Promise.all([
-      Post.find({ user: session.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Post.countDocuments({ user: session.user.id }),
+      Post.find(query)
+        .sort(scheduled ? { scheduledFor: 1 } : { createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Post.countDocuments(query),
     ]);
 
     return successResponse({

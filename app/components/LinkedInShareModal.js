@@ -6,6 +6,10 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
   const [content, setContent] = useState(post?.content || '');
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('');
+  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const handleImageChange = e => {
     const file = e.target.files[0];
@@ -21,11 +25,40 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
 
   const handleSubmit = async e => {
     e.preventDefault();
+
+    if (!content.trim()) {
+      console.error('Content is required');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('content', content);
+
     if (image) {
       formData.append('image', image);
     }
+
+    // Debug log
+    console.log('Form submission:', {
+      isScheduling,
+      scheduleDate,
+      scheduleTime,
+      timezone,
+    });
+
+    if (isScheduling) {
+      if (!scheduleDate || !scheduleTime) {
+        console.error('Date and time are required for scheduling');
+        return;
+      }
+
+      // Create date in selected timezone
+      const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
+      formData.append('scheduledFor', scheduledDateTime.toISOString());
+      formData.append('isScheduled', 'true');
+      formData.append('timezone', timezone);
+    }
+
     onShare(formData);
   };
 
@@ -83,6 +116,61 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
             )}
           </div>
 
+          <div className="mb-4">
+            <label className="flex items-center text-gray-400 mb-4">
+              <input
+                type="checkbox"
+                checked={isScheduling}
+                onChange={e => setIsScheduling(e.target.checked)}
+                className="mr-2 rounded bg-gray-700 border-gray-600"
+              />
+              Schedule this post
+            </label>
+
+            {isScheduling && (
+              <>
+                <div className="flex gap-4 mb-4">
+                  <div className="flex-1">
+                    <label className="block text-sm text-gray-400 mb-2">Date</label>
+                    <input
+                      type="date"
+                      value={scheduleDate}
+                      onChange={e => setScheduleDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-gray-700 text-white rounded p-2"
+                      required={isScheduling}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm text-gray-400 mb-2">Time</label>
+                    <input
+                      type="time"
+                      value={scheduleTime}
+                      onChange={e => setScheduleTime(e.target.value)}
+                      className="w-full bg-gray-700 text-white rounded p-2"
+                      required={isScheduling}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-400 mb-2">Timezone</label>
+                  <select
+                    value={timezone}
+                    onChange={e => setTimezone(e.target.value)}
+                    className="w-full bg-gray-700 text-white rounded p-2"
+                    required={isScheduling}
+                  >
+                    {Intl.supportedValuesOf('timeZone').map(tz => (
+                      <option key={tz} value={tz}>
+                        {tz.replace(/_/g, ' ')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               type="button"
@@ -95,13 +183,15 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSharing}
+              disabled={isSharing || (isScheduling && (!scheduleDate || !scheduleTime))}
             >
               {isSharing ? (
                 <>
                   <LoadingSpinner className="w-4 h-4" />
-                  Sharing...
+                  {isScheduling ? 'Scheduling...' : 'Sharing...'}
                 </>
+              ) : isScheduling ? (
+                'Schedule'
               ) : (
                 'Share'
               )}

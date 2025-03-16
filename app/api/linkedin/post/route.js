@@ -1,91 +1,171 @@
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
+import { NextResponse } from 'next/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import LinkedInToken from '@/models/LinkedInToken';
-import { createPost, refreshAccessToken } from '@/utils/linkedin';
 import dbConnect from '@/utils/db';
+import User from '@/models/User';
+import Post from '@/models/Post';
+import LinkedInToken from '@/models/LinkedInToken';
+import { createPost, getUserInfo } from '@/utils/linkedin';
 
 export async function POST(request) {
   try {
+    await dbConnect();
+
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return new Response('Unauthorized', { status: 401 });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const linkedInToken = await LinkedInToken.findOne({ user: user._id });
+    // Debug log the token status
+    console.log('LinkedIn post attempt:', {
+      userId: session.user.id,
+      hasToken: !!linkedInToken,
+      tokenData: linkedInToken
+        ? {
+            accessToken: !!linkedInToken.accessToken,
+            createdAt: linkedInToken.createdAt,
+            expiresAt: linkedInToken.expiresAt,
+            isExpired: linkedInToken.isExpired?.(),
+          }
+        : null,
+    });
+
+    if (!linkedInToken?.accessToken) {
+      return NextResponse.json({ error: 'LinkedIn not connected' }, { status: 400 });
+    }
+
+    if (linkedInToken.isExpired?.()) {
+      return NextResponse.json(
+        { error: 'LinkedIn token has expired. Please reconnect your account.' },
+        { status: 401 }
+      );
     }
 
     const formData = await request.formData();
+    // Debug log the form data and user info
+    console.log('Form data and auth info:', {
+      content: formData.get('content'),
+      image: formData.get('image')?.name,
+      isScheduled: formData.get('isScheduled'),
+      scheduledFor: formData.get('scheduledFor'),
+      timezone: formData.get('timezone'),
+      userId: session?.user?.id,
+      hasLinkedInToken: !!linkedInToken?.accessToken,
+    });
+
     const content = formData.get('content');
-    const image = formData.get('image');
-
-    if (!content) {
-      return new Response(JSON.stringify({ error: 'Content is required' }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    if (!content?.trim()) {
+      return NextResponse.json(
+        { error: 'Content is required and cannot be empty' },
+        { status: 400 }
+      );
     }
 
-    let imageBuffer;
-    let imageType;
-    if (image) {
-      const arrayBuffer = await image.arrayBuffer();
-      imageBuffer = Buffer.from(arrayBuffer);
-      imageType = image.type;
-    }
-
-    await dbConnect();
-    let linkedInToken = await LinkedInToken.findOne({ userId: session.user.id });
-
-    if (!linkedInToken) {
-      return new Response(JSON.stringify({ error: 'LinkedIn account not connected' }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-
-    // Check if token is expired and refresh if needed
-    if (linkedInToken.isExpired()) {
+    // Validate LinkedIn token
+    if (linkedInToken?.accessToken) {
+      console.log('LinkedIn token found, validating...');
       try {
-        const newTokenData = await refreshAccessToken(linkedInToken.refreshToken);
-        const expiresAt = new Date(Date.now() + newTokenData.expires_in * 1000);
-
-        linkedInToken = await LinkedInToken.findOneAndUpdate(
-          { userId: session.user.id },
-          {
-            accessToken: newTokenData.access_token,
-            refreshToken: newTokenData.refresh_token,
-            expiresAt,
-          },
-          { new: true }
-        );
+        // Test token by getting user info
+        await getUserInfo(linkedInToken.accessToken);
       } catch (error) {
-        console.error('Token refresh error:', error);
-        return new Response(JSON.stringify({ error: 'Failed to refresh LinkedIn token' }), {
-          status: 401,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        console.error('LinkedIn token validation failed:', error);
+        return NextResponse.json(
+          { error: 'LinkedIn authentication failed. Please reconnect your LinkedIn account.' },
+          { status: 401 }
+        );
       }
     }
 
-    // Create post on LinkedIn with image if provided
-    const result = await createPost(linkedInToken.accessToken, content, imageBuffer, imageType);
+    const image = formData.get('image');
+    const isScheduled = formData.get('isScheduled') === 'true';
+    const scheduledFor = formData.get('scheduledFor');
 
-    return new Response(JSON.stringify({ success: true, postId: result.id }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    let post;
+
+    if (isScheduled && scheduledFor) {
+      const timezone = formData.get('timezone');
+      if (!timezone) {
+        return NextResponse.json({ error: 'Timezone is required for scheduling' }, { status: 400 });
+      }
+
+      // Parse date with timezone
+      const scheduledDate = new Date(
+        new Date(scheduledFor).toLocaleString('en-US', { timeZone: timezone })
+      );
+      if (scheduledDate <= new Date()) {
+        return NextResponse.json(
+          { error: 'Scheduled date must be in the future' },
+          { status: 400 }
+        );
+      }
+
+      try {
+        // Create a scheduled post
+        post = await Post.create({
+          user: user._id,
+          content,
+          isScheduled: true,
+          scheduledFor: scheduledDate,
+          topic: formData.get('topic') || 'Scheduled Post',
+          tone: formData.get('tone') || 'professional',
+        });
+      } catch (err) {
+        return NextResponse.json({ error: err.message }, { status: 400 });
+      }
+
+      return NextResponse.json({ message: 'Post scheduled successfully', post });
+    } else {
+      // Share immediately
+      let imageBuffer = null;
+      let imageType = null;
+
+      if (image) {
+        const arrayBuffer = await image.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuffer);
+        imageType = image.type;
+      }
+
+      const response = await createPost(linkedInToken.accessToken, content, imageBuffer, imageType);
+
+      if (response.success) {
+        post = await Post.create({
+          user: user._id,
+          content,
+          topic: 'Direct Share',
+          tone: 'professional',
+          linkedinPostId: response.postId,
+          isPublished: true,
+          publishedAt: new Date(),
+        });
+      }
+
+      return NextResponse.json({ message: 'Post shared successfully', post });
+    }
   } catch (error) {
-    console.error('LinkedIn post error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create LinkedIn post' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    console.error('Error in LinkedIn post route:', {
+      error,
+      session: await getServerSession(authOptions),
+      formData: request.formData ? await request.formData() : null,
     });
+
+    return NextResponse.json(
+      {
+        error: error.message,
+        details:
+          process.env.NODE_ENV === 'development'
+            ? {
+                name: error.name,
+                stack: error.stack,
+              }
+            : undefined,
+      },
+      { status: 500 }
+    );
   }
 }
