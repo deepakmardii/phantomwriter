@@ -62,11 +62,36 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
         return;
       }
 
-      // Create date in selected timezone
-      const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
-      formData.append('scheduledFor', scheduledDateTime.toISOString());
-      formData.append('isScheduled', 'true');
-      formData.append('timezone', timezone);
+      try {
+        // Convert the date and time to the selected timezone using Intl
+        const localDateTime = `${scheduleDate}T${scheduleTime}`;
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        // First create date in user's local timezone
+        const localDate = new Date(localDateTime);
+
+        // Convert to UTC by adjusting for timezone difference
+        const targetDate = new Date(localDate.toLocaleString('en-US', { timeZone: timezone }));
+        const offset = targetDate.getTime() - localDate.getTime();
+        const scheduledUTC = new Date(localDate.getTime() - offset);
+
+        // Debug logging
+        console.log('Schedule time conversion:', {
+          inputDate: localDateTime,
+          userTimezone,
+          selectedTimezone: timezone,
+          localDate: localDate.toISOString(),
+          targetDate: targetDate.toISOString(),
+          finalUTC: scheduledUTC.toISOString(),
+        });
+
+        formData.append('scheduledFor', scheduledUTC.toISOString());
+        formData.append('isScheduled', 'true');
+        formData.append('timezone', timezone);
+      } catch (error) {
+        console.error('Error converting timezone:', error);
+        return;
+      }
     }
 
     onShare(formData);
@@ -150,13 +175,24 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                       type="date"
                       value={scheduleDate}
                       onChange={e => setScheduleDate(e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date()
+                        .toLocaleString('en-US', {
+                          timeZone: timezone,
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        })
+                        .split('/')
+                        .reverse()
+                        .join('-')}
                       className="w-full bg-white border border-gray rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       required={isScheduling}
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-600 mb-2">Time</label>
+                    <label className="block text-sm text-gray-600 mb-2">
+                      Time ({timezone.split('/').pop().replace(/_/g, ' ')})
+                    </label>
                     <input
                       type="time"
                       value={scheduleTime}
@@ -165,6 +201,15 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                       required={isScheduling}
                     />
                     <p className="text-xs text-gray-600 mt-1">
+                      Current time:{' '}
+                      {new Date().toLocaleTimeString('en-US', {
+                        timeZone: timezone,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-600">
                       Please schedule at least 5 minutes in advance
                     </p>
                   </div>
@@ -177,12 +222,37 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                     className="w-full bg-white border border-gray rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     required={isScheduling}
                   >
-                    {Intl.supportedValuesOf('timeZone').map(tz => (
-                      <option key={tz} value={tz}>
-                        {tz.replace(/_/g, ' ')}
-                      </option>
-                    ))}
+                    {Intl.supportedValuesOf('timeZone').map(tz => {
+                      // Get timezone offset and format timezone name
+                      const date = new Date();
+                      const timeString = date.toLocaleTimeString('en-US', {
+                        timeZone: tz,
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+                      const tzOffset = new Date()
+                        .toLocaleString('en-US', {
+                          timeZone: tz,
+                          timeZoneName: 'short',
+                        })
+                        .split(' ')
+                        .pop();
+
+                      // Format timezone name: "Region/City (GMT+5:30) 14:30"
+                      const [region, ...cityParts] = tz.split('/');
+                      const city = cityParts.join('/').replace(/_/g, ' ');
+
+                      return (
+                        <option key={tz} value={tz}>
+                          {city} ({tzOffset}) {timeString}
+                        </option>
+                      );
+                    })}
                   </select>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Times shown in selected timezone: {timezone.split('/').pop().replace(/_/g, ' ')}
+                  </p>
                 </div>
               </>
             )}
