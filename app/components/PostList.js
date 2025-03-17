@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 export default function PostList() {
   const { data: session, status } = useSession();
   const { showNotification } = useNotification();
-  const { refreshTrigger } = useRefreshPosts();
+  const { refreshTrigger, refresh } = useRefreshPosts();
   const {
     page,
     limit,
@@ -107,6 +107,7 @@ export default function PostList() {
       }
 
       showNotification('Successfully shared to LinkedIn!', 'success');
+      await refresh(); // Refresh posts list to show latest state
       setShowShareModal(false);
       setSelectedPost(null);
     } catch (error) {
