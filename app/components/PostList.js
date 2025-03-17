@@ -29,6 +29,7 @@ export default function PostList() {
   const [initialLoad, setInitialLoad] = useState(true);
   const [linkedInStatus, setLinkedInStatus] = useState({ isConnected: false, isExpired: false });
   const [sharingPost, setSharingPost] = useState(null);
+  const [deletingPostId, setDeletingPostId] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
@@ -82,6 +83,32 @@ export default function PostList() {
   const handleShareClick = post => {
     setSelectedPost(post);
     setShowShareModal(true);
+  };
+
+  const deletePost = async postId => {
+    if (status !== 'authenticated') {
+      showNotification('Please login to delete posts', 'error');
+      return;
+    }
+
+    setDeletingPostId(postId);
+    try {
+      const res = await fetch(`/api/posts/delete?id=${postId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete post');
+      }
+
+      showNotification('Post deleted successfully', 'success');
+      await refresh(); // Refresh posts list to show latest state
+    } catch (error) {
+      showNotification(error.message, 'error');
+    } finally {
+      setDeletingPostId(null);
+    }
   };
 
   const shareToLinkedIn = async formData => {
@@ -201,15 +228,61 @@ export default function PostList() {
                   ))}
                 </div>
               )}
-              {linkedInStatus.isConnected && (
+              <div className="flex items-center gap-2">
+                {linkedInStatus.isConnected && (
+                  <button
+                    onClick={() => handleShareClick(post)}
+                    disabled={sharingPost === post._id}
+                    className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Share to LinkedIn
+                  </button>
+                )}
                 <button
-                  onClick={() => handleShareClick(post)}
-                  disabled={sharingPost === post._id}
-                  className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => deletePost(post._id)}
+                  disabled={deletingPostId === post._id}
+                  className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
-                  Share to LinkedIn
+                  {deletingPostId === post._id ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      <span>Delete</span>
+                    </>
+                  )}
                 </button>
-              )}
+              </div>
             </div>
           </div>
         </div>

@@ -37,7 +37,7 @@ export default function PostCalendar({ posts }) {
 
   const getDayPosts = day => {
     return posts.filter(post => {
-      if (!post.scheduledFor || post.linkedinPostId) return false;
+      if (!post.scheduledFor || post.isPublished) return false;
       const postDate = new Date(post.scheduledFor);
       return (
         postDate.getDate() === day &&

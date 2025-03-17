@@ -34,7 +34,7 @@ export async function GET(request) {
     if (scheduled) {
       query.isScheduled = true;
       query.isPublished = false;
-      query.linkedinPostId = { $exists: false }; // Exclude posts that have been shared
+      query.scheduledFor = { $exists: true }; // Ensure scheduledFor date exists
     }
 
     const [posts, total] = await Promise.all([
