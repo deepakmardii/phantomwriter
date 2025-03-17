@@ -2,8 +2,17 @@ import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-export function useScheduledPosts(refreshInterval = 300000) {
-  // Check every 5 minutes
+const DEV_INTERVAL = 60000; // 1 minute in development
+const PROD_INTERVAL = 300000; // 5 minutes in production
+
+/**
+ * Hook for handling scheduled posts checking
+ * - In development: Checks every minute to help with testing
+ * - In production: Checks every 5 minutes as a fallback
+ *   (primary scheduling handled by Vercel Cron)
+ */
+export function useScheduledPosts() {
+  const refreshInterval = process.env.NODE_ENV === 'development' ? DEV_INTERVAL : PROD_INTERVAL;
   const { data: session } = useSession();
   const router = useRouter();
 

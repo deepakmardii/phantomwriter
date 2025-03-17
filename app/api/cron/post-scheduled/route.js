@@ -4,30 +4,58 @@ import Post from '@/models/Post';
 import LinkedInToken from '@/models/LinkedInToken';
 import { createPost } from '@/utils/linkedin';
 
-export async function POST() {
+export async function POST(request) {
+  // Check if this is a Vercel Cron invocation
+  const isVercelCron = request.headers.get('x-vercel-cron') === 'true';
+
+  console.log('Post scheduled check initiated:', {
+    source: isVercelCron ? 'Vercel Cron' : 'Client Polling',
+    timestamp: new Date().toISOString(),
+  });
   try {
     await dbConnect();
 
-    // Find all scheduled posts that are due
+    // Get current time in UTC and IST for logging
     const now = new Date();
+    const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+
+    console.log('Cron job execution time:', {
+      utc: now.toISOString(),
+      ist: istTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+    });
+
     const scheduledPosts = await Post.find({
       isScheduled: true,
       scheduledFor: { $lte: now },
-      linkedinPostId: { $exists: false },
-      isPublished: false, // Add this condition to ensure we only get unpublished posts
+      isPublished: false,
     }).populate('user');
 
-    // Debug log the found posts
-    console.log(
-      'Found posts for scheduling:',
-      scheduledPosts.map(p => ({
-        id: p._id,
-        content: p.content.slice(0, 30),
-        scheduledFor: p.scheduledFor,
-      }))
-    );
+    // Debug log each post's scheduling details
+    scheduledPosts.forEach(post => {
+      const postScheduledTime = new Date(post.scheduledFor);
+      const postIstTime = new Date(
+        postScheduledTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+      );
 
-    console.log(`Found ${scheduledPosts.length} scheduled posts to process`);
+      console.log('Post scheduling details:', {
+        id: post._id,
+        content: post.content.slice(0, 30),
+        timezone: post.timezone,
+        scheduledFor: {
+          utc: postScheduledTime.toISOString(),
+          ist: postIstTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+        },
+        currentTime: {
+          utc: now.toISOString(),
+          ist: istTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+        },
+        timeDiff: Math.floor((now - postScheduledTime) / 1000) + ' seconds',
+      });
+    });
+
+    console.log(
+      `Found ${scheduledPosts.length} scheduled posts to process at ${istTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`
+    );
 
     const results = [];
 
