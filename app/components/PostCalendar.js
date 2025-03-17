@@ -99,10 +99,7 @@ export default function PostCalendar({ posts }) {
 
       <div className="grid grid-cols-7 gap-2">
         {[...Array(firstDayOfMonth)].map((_, index) => (
-          <div
-            key={`empty-${index}`}
-            className="h-24 bg-gray-50 rounded-lg border border-gray"
-          ></div>
+          <div key={`empty-${index}`} className="h-24 bg-white rounded-lg border border-gray"></div>
         ))}
 
         {[...Array(daysInMonth)].map((_, index) => {

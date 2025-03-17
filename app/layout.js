@@ -21,7 +21,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-900 min-h-screen`}>
+      <body className={`${inter.className} bg-white min-h-screen`}>
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = {

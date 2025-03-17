@@ -73,8 +73,8 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl">
+    <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl shadow-lg border border-gray-200">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl text-gray-800 font-semibold">Share to LinkedIn</h2>
           <button
