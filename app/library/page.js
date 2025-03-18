@@ -13,8 +13,8 @@ export default function Library() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Post Library</h1>
         <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Your Posts</h2>
           <PostList />
         </div>
       </div>

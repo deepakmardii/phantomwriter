@@ -183,11 +183,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Create Post</h1>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column - Generate Post Form */}
           <div className="lg:w-1/2">
             <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Generate New Post</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Post Generator</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
@@ -262,7 +263,7 @@ export default function Dashboard() {
           {/* Right Column - Current Post & Actions */}
           <div className="lg:w-1/2">
             <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6 h-full">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Generated Post</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Generated Post</h2>
               {!linkedInStatus.isConnected && (
                 <div className="bg-white p-4 rounded-lg mb-4 flex items-center justify-between border border-gray">
                   <div>
