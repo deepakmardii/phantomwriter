@@ -187,14 +187,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Create Post</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Post</h1>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column - Generate Post Form */}
           <div className="lg:w-1/2">
-            <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Post Generator</h2>
+            <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Post Generator</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
@@ -208,7 +208,7 @@ export default function Dashboard() {
                     onChange={handleChange}
                     required
                     disabled={generatingPost}
-                    className="mt-1 block w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
                     placeholder="E.g., Leadership in tech, Remote work challenges"
                   />
                 </div>
@@ -223,7 +223,7 @@ export default function Dashboard() {
                     value={formData.tone}
                     onChange={handleChange}
                     disabled={generatingPost}
-                    className="mt-1 block w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
                   >
                     <option value="professional">Professional</option>
                     <option value="casual">Casual</option>
@@ -251,7 +251,7 @@ export default function Dashboard() {
                 <button
                   type="submit"
                   disabled={generatingPost}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:translate-y-[-1px]"
                 >
                   {generatingPost ? (
                     <div className="flex items-center">
@@ -268,8 +268,8 @@ export default function Dashboard() {
 
           {/* Right Column - Current Post & Actions */}
           <div className="lg:w-1/2">
-            <div className="bg-white px-4 py-5 rounded-lg shadow-sm border border-gray sm:p-6 h-full">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Generated Post</h2>
+            <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg h-full">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Generated Post</h2>
               {!linkedInStatus.isConnected && (
                 <div className="bg-white p-4 rounded-lg mb-4 flex items-center justify-between border border-gray">
                   <div>
@@ -296,9 +296,11 @@ export default function Dashboard() {
               )}
               {currentPost ? (
                 <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg border border-gray">
-                    <p className="text-gray-700 whitespace-pre-wrap mb-4">{currentPost.content}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <p className="text-gray-800 whitespace-pre-wrap mb-6 leading-relaxed">
+                      {currentPost.content}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-6">
                       {currentPost.keywords?.map((keyword, index) => (
                         <span
                           key={index}
@@ -312,15 +314,32 @@ export default function Dashboard() {
                       <div className="flex flex-wrap gap-3">
                         <button
                           onClick={handleCopy}
-                          className="flex-1 py-2 px-4 border border-gray text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex-1 py-2.5 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium flex items-center justify-center gap-2"
                         >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                            />
+                          </svg>
                           Copy to Clipboard
                         </button>
                         {linkedInStatus.isConnected && (
                           <button
                             onClick={() => setShowShareModal(true)}
-                            className="flex-1 py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                            className="flex-1 py-2.5 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all duration-200 transform hover:translate-y-[-1px] font-medium flex items-center justify-center gap-2 shadow-sm"
                           >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                            </svg>
                             Share to LinkedIn
                           </button>
                         )}
@@ -337,14 +356,28 @@ export default function Dashboard() {
                           value={improvements}
                           onChange={e => setImprovements(e.target.value)}
                           placeholder="Describe what improvements you want in the regenerated post..."
-                          className="w-full bg-white border border-gray rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors mb-3"
+                          className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400 mb-4"
                           rows={2}
                         />
                         <button
                           onClick={handleRegenerate}
                           disabled={generatingPost}
-                          className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-3 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all duration-200 transform hover:translate-y-[-1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 font-medium flex items-center justify-center gap-2"
                         >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </svg>
                           {generatingPost ? 'Generating...' : 'Not happy? Generate again'}
                         </button>
                       </div>
@@ -352,8 +385,24 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-600">
-                  Generated post will appear here
+                <div className="text-center py-12 px-6">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                  </svg>
+                  <h3 className="mt-4 text-lg font-medium text-gray-900">No post generated yet</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Fill in the form to generate your first post
+                  </p>
                 </div>
               )}
             </div>

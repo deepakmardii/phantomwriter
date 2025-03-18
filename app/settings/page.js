@@ -135,13 +135,13 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* User Details Section */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray">
+          <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">User Details</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -156,7 +156,7 @@ export default function Settings() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray rounded-lg shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
                   />
                 </div>
               </div>
@@ -172,7 +172,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={loading || !isNameChanged}
-                  className="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:translate-y-[-1px]"
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -181,8 +181,8 @@ export default function Settings() {
           </div>
 
           {/* Change Password Section */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Change Password</h2>
+          <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Change Password</h2>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
                 <label
@@ -199,7 +199,7 @@ export default function Settings() {
                     required
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray rounded-lg shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
                   />
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function Settings() {
                     required
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray rounded-lg shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
                   />
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={loading || !arePasswordFieldsComplete}
-                  className="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:translate-y-[-1px]"
                 >
                   {loading ? 'Updating...' : 'Update Password'}
                 </button>
