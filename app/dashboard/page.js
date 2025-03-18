@@ -108,9 +108,15 @@ export default function Dashboard() {
         topic: currentPost.topic,
         tone: currentPost.tone,
         keywords: currentPost.keywords.join(', '),
+        // Combine previous improvements with new ones if they exist
+        improvements: improvements
+          ? currentPost.improvements
+            ? `${currentPost.improvements}, ${improvements}`
+            : improvements
+          : currentPost.improvements,
       };
       setFormData(newFormData);
-      generatePost(newFormData); // Directly call generatePost with new data
+      generatePost(newFormData);
     }
   };
 

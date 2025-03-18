@@ -47,11 +47,12 @@ export async function POST(request) {
     }
 
     // Generate post content
-    const { topic, tone, keywords = [] } = body;
+    const { topic, tone, keywords = [], improvements } = body;
     const generatedContent = await generateLinkedInPost({
       topic,
       tone,
       keywords,
+      improvements,
     });
 
     if (!generatedContent.success) {
@@ -65,6 +66,7 @@ export async function POST(request) {
       topic,
       tone,
       keywords,
+      improvements,
       isPublished: false,
     });
 

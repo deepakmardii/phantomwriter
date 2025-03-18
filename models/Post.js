@@ -25,6 +25,9 @@ const postSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  improvements: {
+    type: String,
+  },
   isPublished: {
     type: Boolean,
     default: false,
