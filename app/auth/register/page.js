@@ -15,7 +15,6 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    linkedinProfile: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -130,24 +129,6 @@ export default function Register() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray rounded-lg shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="linkedinProfile" className="block text-sm font-medium text-gray-700">
-                LinkedIn Profile URL
-              </label>
-              <div className="mt-1">
-                <input
-                  id="linkedinProfile"
-                  name="linkedinProfile"
-                  type="url"
-                  required
-                  value={formData.linkedinProfile}
-                  onChange={handleChange}
-                  placeholder="https://www.linkedin.com/in/your-profile"
                   className="appearance-none block w-full px-3 py-2 border border-gray rounded-lg shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                 />
               </div>

@@ -60,19 +60,26 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.role = user.role;
         token.subscription = user.subscription;
       }
+
+      // Handle updates to the session
+      if (trigger === 'update' && session?.name) {
+        token.name = session.name;
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.name = token.name;
         session.user.subscription = token.subscription;
         // Include both the raw JWT token and the token object
         session.accessToken = token.jti;
