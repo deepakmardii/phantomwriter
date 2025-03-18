@@ -12,7 +12,7 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function connectDB(retries = 5) {
+const dbConnect = async (retries = 5) => {
   if (cached.conn) {
     return cached.conn;
   }
@@ -58,6 +58,36 @@ async function connectDB(retries = 5) {
 
         const connection = await mongoose.connect(MONGODB_URI, opts);
         console.log('MongoDB connected successfully');
+
+        try {
+          // Check and seed admin user if not exists
+          const User = (await import('@/models/User.js')).default;
+
+          const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+          const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+          console.log('Checking for admin user...');
+          const adminExists = await User.findOne({ role: 'admin' });
+          console.log('Admin exists?', !!adminExists);
+
+          if (!adminExists) {
+            console.log('Creating default admin user...');
+            const admin = await User.create({
+              name: 'Admin',
+              email: adminEmail,
+              password: adminPassword,
+              role: 'admin',
+              subscription: {
+                status: 'active',
+                expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 1 year
+              },
+            });
+            console.log('Default admin user created successfully:', admin.email);
+          }
+        } catch (error) {
+          console.error('Error while checking/creating admin:', error);
+        }
+
         return connection;
       } catch (error) {
         if (retriesLeft > 0) {
@@ -81,6 +111,7 @@ async function connectDB(retries = 5) {
   }
 
   return cached.conn;
-}
+};
 
-export default connectDB;
+export { dbConnect };
+export default dbConnect;

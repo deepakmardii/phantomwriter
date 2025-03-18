@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import Feedback from '../../../../models/Feedback';
-import { connectToDatabase } from '../../../../utils/db';
+import dbConnect from '@/utils/db';
 
 export async function POST(request) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request) {
       );
     }
 
-    await connectToDatabase();
+    await dbConnect();
 
     const feedback = await Feedback.create({
       type,

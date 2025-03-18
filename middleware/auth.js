@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import User from '@/models/User';
-import connectDB from '@/utils/db';
+import dbConnect from '@/utils/db';
 
 export async function authenticate(request) {
   try {
@@ -22,7 +22,7 @@ export async function authenticate(request) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Connect to database
-    await connectDB();
+    await dbConnect();
 
     // Get user from database (NextAuth stores user ID in sub or id field)
     const userId = decoded.sub || decoded.id;

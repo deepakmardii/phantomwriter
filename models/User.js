@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please provide a name'],
     maxlength: [50, 'Name cannot be more than 50 characters'],
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
   email: {
     type: String,
     required: [true, 'Please provide an email'],
@@ -56,10 +61,11 @@ const userSchema = new mongoose.Schema({
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 // Match password

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/utils/db';
+import dbConnect from '@/utils/db';
 import User from '@/models/User';
 import { generateToken } from '@/middleware/auth';
 
 export async function POST(request) {
   try {
-    await connectDB();
+    await dbConnect();
 
     const { name, email, password, linkedinProfile } = await request.json();
 

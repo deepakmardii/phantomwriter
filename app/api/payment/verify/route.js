@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { authenticate } from "@/middleware/auth";
-import { validatePaymentSignature, SUBSCRIPTION_PLANS } from "@/utils/razorpay";
-import User from "@/models/User";
-import connectDB from "@/utils/db";
+import { NextResponse } from 'next/server';
+import { authenticate } from '@/middleware/auth';
+import { validatePaymentSignature, SUBSCRIPTION_PLANS } from '@/utils/razorpay';
+import User from '@/models/User';
+import dbConnect from '@/utils/db';
 
 export async function POST(request) {
   try {
@@ -15,14 +15,9 @@ export async function POST(request) {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } =
       await request.json();
 
-    if (
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature ||
-      !plan
-    ) {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan) {
       return NextResponse.json(
-        { success: false, message: "Missing required parameters" },
+        { success: false, message: 'Missing required parameters' },
         { status: 400 }
       );
     }
@@ -36,7 +31,7 @@ export async function POST(request) {
 
     if (!isValid) {
       return NextResponse.json(
-        { success: false, message: "Invalid payment signature" },
+        { success: false, message: 'Invalid payment signature' },
         { status: 400 }
       );
     }
@@ -45,13 +40,13 @@ export async function POST(request) {
     const selectedPlan = SUBSCRIPTION_PLANS[plan];
     if (!selectedPlan) {
       return NextResponse.json(
-        { success: false, message: "Invalid subscription plan" },
+        { success: false, message: 'Invalid subscription plan' },
         { status: 400 }
       );
     }
 
     // Update user subscription
-    await connectDB();
+    await dbConnect();
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + selectedPlan.duration);
 
@@ -59,7 +54,7 @@ export async function POST(request) {
       authRequest.user._id,
       {
         subscription: {
-          status: "active",
+          status: 'active',
           expiresAt: expiryDate,
         },
       },
@@ -68,14 +63,11 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: "Payment verified and subscription activated",
+      message: 'Payment verified and subscription activated',
       subscription: user.subscription,
     });
   } catch (error) {
-    console.error("Payment verification error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+    console.error('Payment verification error:', error);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }

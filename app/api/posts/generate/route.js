@@ -3,7 +3,7 @@ import { authenticate } from '@/middleware/auth';
 import { generateLinkedInPost } from '@/utils/ai';
 import Post from '@/models/Post';
 import User from '@/models/User';
-import connectDB from '@/utils/db';
+import dbConnect from '@/utils/db';
 import {
   successResponse,
   errorResponse,
@@ -24,7 +24,7 @@ export async function POST(request) {
     validateRequestBody(body, ['topic', 'tone']);
 
     // Connect to database
-    await connectDB();
+    await dbConnect();
 
     // Check subscription and monthly limits
     const user = authRequest.user;

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { authenticate } from "@/middleware/auth";
-import { createOrder, SUBSCRIPTION_PLANS } from "@/utils/razorpay";
-import connectDB from "@/utils/db";
+import { NextResponse } from 'next/server';
+import { authenticate } from '@/middleware/auth';
+import { createOrder, SUBSCRIPTION_PLANS } from '@/utils/razorpay';
+import dbConnect from '@/utils/db';
 
 export async function POST(request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request) {
 
     if (!plan || !SUBSCRIPTION_PLANS[plan]) {
       return NextResponse.json(
-        { success: false, message: "Invalid subscription plan" },
+        { success: false, message: 'Invalid subscription plan' },
         { status: 400 }
       );
     }
@@ -27,7 +27,7 @@ export async function POST(request) {
 
     if (!orderResponse.success) {
       return NextResponse.json(
-        { success: false, message: "Failed to create order" },
+        { success: false, message: 'Failed to create order' },
         { status: 500 }
       );
     }
@@ -38,10 +38,7 @@ export async function POST(request) {
       plan: selectedPlan,
     });
   } catch (error) {
-    console.error("Create order error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+    console.error('Create order error:', error);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }

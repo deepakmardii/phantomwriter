@@ -15,21 +15,30 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
+          console.log('Auth attempt for email:', credentials?.email);
+
           if (!credentials?.email || !credentials?.password) {
+            console.log('Missing email or password');
             throw new Error('Email and password required');
           }
 
           await dbConnect();
+          console.log('Connected to DB, searching for user...');
+
           // Include password field explicitly since it's select: false by default
           const user = await User.findOne({ email: credentials.email }).select('+password');
+          console.log('User found?', !!user, 'Role:', user?.role);
 
           if (!user) {
+            console.log('User not found');
             throw new Error('Invalid credentials');
           }
 
           const isPasswordValid = await compare(credentials.password, user.password);
+          console.log('Password valid?', isPasswordValid);
 
           if (!isPasswordValid) {
+            console.log('Invalid password');
             throw new Error('Invalid credentials');
           }
 
@@ -38,6 +47,7 @@ export const authOptions = {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
+            role: user.role,
             subscription: user.subscription,
           };
 
@@ -54,6 +64,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.role = user.role;
         token.subscription = user.subscription;
       }
       return token;
@@ -61,6 +72,7 @@ export const authOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
+        session.user.role = token.role;
         session.user.subscription = token.subscription;
         // Include both the raw JWT token and the token object
         session.accessToken = token.jti;

@@ -18,9 +18,10 @@ export default function Login() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/dashboard');
+      const isAdmin = session?.user?.role === 'admin';
+      router.replace(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   const handleChange = e => {
     setFormData({
@@ -53,8 +54,11 @@ export default function Login() {
         throw new Error(errorMessage);
       }
 
+      const session = await fetch('/api/auth/session');
+      const sessionData = await session.json();
+
       showNotification('Login successful', 'success');
-      router.push('/dashboard');
+      router.push(sessionData?.user?.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {
       showNotification(err.message, 'error');
       setLoading(false);
