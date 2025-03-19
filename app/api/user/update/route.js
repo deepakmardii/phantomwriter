@@ -23,8 +23,27 @@ export async function PUT(req) {
     }
 
     // Handle password update
-    if (data.currentPassword && data.newPassword) {
-      // Verify current password
+    if (data.newPassword) {
+      // For Google users setting up password for the first time
+      if (data.isGoogleUser && user.provider === 'google' && !user.password) {
+        user.password = data.newPassword;
+        user.provider = 'credentials'; // Allow them to use either Google or password
+        await user.save();
+
+        return Response.json({
+          success: true,
+          message: 'Password set up successfully',
+        });
+      }
+
+      // For regular password updates, verify current password
+      if (!data.currentPassword) {
+        return Response.json(
+          { success: false, message: 'Current password is required' },
+          { status: 400 }
+        );
+      }
+
       const isMatch = await user.matchPassword(data.currentPassword);
       if (!isMatch) {
         return Response.json(
