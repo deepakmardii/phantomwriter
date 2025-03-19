@@ -30,10 +30,10 @@ export function useScheduledPosts() {
 
         if (response.ok) {
           const result = await response.json();
-          console.log('Scheduled posts check:', result);
+          // console.log('Scheduled posts check:', result);
 
           // Debug log the response
-          console.log('Scheduler response:', result);
+          // console.log('Scheduler response:', result);
 
           // Always refresh if we processed any posts
           if (result.results?.length > 0) {

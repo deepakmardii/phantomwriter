@@ -6,7 +6,7 @@ import dbConnect from '@/utils/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request) {
+export async function GET(_request) {
   return withErrorHandling(async () => {
     const session = await getServerSession(authOptions);
     if (!session) {

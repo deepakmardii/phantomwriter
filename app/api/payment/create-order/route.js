@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authenticate } from '@/middleware/auth';
 import { createOrder, SUBSCRIPTION_PLANS } from '@/utils/razorpay';
-import dbConnect from '@/utils/db';
+// import dbConnect from '@/utils/db';
 
 export async function POST(request) {
   try {

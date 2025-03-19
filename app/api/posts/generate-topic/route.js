@@ -4,7 +4,7 @@ import { generateTopicWithAI } from '@/utils/ai';
 import dbConnect from '@/utils/db';
 import {
   successResponse,
-  errorResponse,
+  // errorResponse,
   withErrorHandling,
   validateRequestBody,
 } from '@/utils/api-helpers';

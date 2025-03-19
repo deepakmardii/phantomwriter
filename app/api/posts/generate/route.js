@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { authenticate } from '@/middleware/auth';
 import { generateLinkedInPost } from '@/utils/ai';
 import Post from '@/models/Post';
-import User from '@/models/User';
+// import User from '@/models/User';
 import dbConnect from '@/utils/db';
 import {
   successResponse,

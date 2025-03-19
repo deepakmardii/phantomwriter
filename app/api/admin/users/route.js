@@ -3,7 +3,7 @@ import User from '@/models/User';
 import dbConnect from '@/utils/db';
 
 // GET all users
-export const GET = withAdminAuth(async req => {
+export const GET = withAdminAuth(async _req => {
   try {
     await dbConnect();
     const users = await User.find({}).select('-password');

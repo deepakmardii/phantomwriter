@@ -1,12 +1,13 @@
 'use client';
-import { useState, useEffect } from 'react';
+/* eslint-disable no-console */
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import PostCalendar from '../components/PostCalendar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import LinkedInShareModal from '../components/LinkedInShareModal';
 
 export default function CalendarPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState(null);
@@ -14,7 +15,7 @@ export default function CalendarPage() {
   const [error, setError] = useState(null);
   const [linkedInStatus, setLinkedInStatus] = useState({ isConnected: false, isExpired: false });
 
-  const fetchScheduledPosts = async () => {
+  const fetchScheduledPosts = useCallback(async () => {
     try {
       const response = await fetch('/api/posts/get?scheduled=true', {
         credentials: 'include',
@@ -59,9 +60,9 @@ export default function CalendarPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setError, setPosts, setLoading, setEditingPost]);
 
-  const checkLinkedInStatus = async () => {
+  const checkLinkedInStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/linkedin/status', {
         credentials: 'include',
@@ -73,7 +74,7 @@ export default function CalendarPage() {
       console.error('Failed to check LinkedIn status:', error);
       setError('Failed to check LinkedIn connection status');
     }
-  };
+  }, [setLinkedInStatus, setError]);
 
   const connectLinkedIn = async () => {
     try {
@@ -93,7 +94,7 @@ export default function CalendarPage() {
       fetchScheduledPosts();
       checkLinkedInStatus();
     }
-  }, [status]);
+  }, [status, fetchScheduledPosts, checkLinkedInStatus]);
 
   const handleShare = async formData => {
     if (!linkedInStatus.isConnected) {

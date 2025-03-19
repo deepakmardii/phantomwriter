@@ -5,7 +5,7 @@ import dbConnect from '@/utils/db';
 import User from '@/models/User';
 import LinkedInToken from '@/models/LinkedInToken';
 
-export async function POST(request) {
+export async function POST(_request) {
   try {
     await dbConnect();
 

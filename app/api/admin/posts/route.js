@@ -3,7 +3,7 @@ import Post from '@/models/Post';
 import dbConnect from '@/utils/db';
 
 // GET all posts
-export const GET = withAdminAuth(async req => {
+export const GET = withAdminAuth(async _req => {
   try {
     await dbConnect();
     const posts = await Post.find({}).populate('user', 'name email');

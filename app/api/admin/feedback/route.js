@@ -3,7 +3,7 @@ import Feedback from '@/models/Feedback';
 import dbConnect from '@/utils/db';
 
 // GET all feedback
-export const GET = withAdminAuth(async req => {
+export const GET = withAdminAuth(async _req => {
   try {
     await dbConnect();
     const feedback = await Feedback.find({}).populate('userId', 'name email');

@@ -1,4 +1,6 @@
 'use client';
+/* eslint-disable no-console */
+import Image from 'next/image';
 import { useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -150,7 +152,16 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
             />
             {imagePreview && (
               <div className="mt-2">
-                <img src={imagePreview} alt="Preview" className="max-h-48 rounded" />
+                <div style={{ maxHeight: '12rem', position: 'relative' }}>
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    width={200}
+                    height={150}
+                    className="rounded object-contain"
+                    style={{ maxHeight: '12rem', width: 'auto' }}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -239,9 +250,8 @@ export default function LinkedInShareModal({ post, onClose, onShare, isSharing }
                         .split(' ')
                         .pop();
 
-                      // Format timezone name: "Region/City (GMT+5:30) 14:30"
-                      const [region, ...cityParts] = tz.split('/');
-                      const city = cityParts.join('/').replace(/_/g, ' ');
+                      // Format timezone name: "City (GMT+5:30) 14:30"
+                      const city = tz.split('/').slice(1).join('/').replace(/_/g, ' ');
 
                       return (
                         <option key={tz} value={tz}>

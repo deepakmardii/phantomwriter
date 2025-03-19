@@ -54,7 +54,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ _user, account, profile }) {
       if (account.provider === 'google') {
         try {
           await dbConnect();
@@ -142,10 +142,10 @@ export const authOptions = {
       }
       return session;
     },
-    async encode({ secret, token }) {
+    async encode({ _secret, token }) {
       return jwt.sign(token, process.env.JWT_SECRET);
     },
-    async decode({ secret, token }) {
+    async decode({ _secret, token }) {
       return jwt.verify(token, process.env.JWT_SECRET);
     },
   },

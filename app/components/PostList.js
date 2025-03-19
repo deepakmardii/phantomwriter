@@ -8,7 +8,7 @@ import LinkedInShareModal from './LinkedInShareModal';
 import { useSession } from 'next-auth/react';
 
 export default function PostList() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const { showNotification } = useNotification();
   const { refreshTrigger, refresh } = useRefreshPosts();
   const {

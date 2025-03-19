@@ -1,17 +1,18 @@
 'use client';
+/* eslint-disable no-console */
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNotification } from '@/app/providers/NotificationProvider';
-import { useRefreshPosts } from '@/app/hooks/useRefreshPosts';
+// import { useRefreshPosts } from '@/app/hooks/useRefreshPosts';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import LinkedInShareModal from '@/app/components/LinkedInShareModal';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { isAuthenticated, token, logout } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const { showNotification } = useNotification();
-  const { refresh } = useRefreshPosts();
+  // const { refresh:_ } = useRefreshPosts(); // Only destructure if needed later
 
   const [formData, setFormData] = useState({
     topic: '',
@@ -169,7 +170,7 @@ export default function Dashboard() {
     }
   };
 
-  const checkLinkedInStatus = async () => {
+  const checkLinkedInStatus = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const res = await fetch('/api/linkedin/status');
@@ -179,7 +180,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to check LinkedIn status:', error);
     }
-  };
+  }, [isAuthenticated]);
 
   const connectLinkedIn = async () => {
     if (!isAuthenticated) {
@@ -229,7 +230,7 @@ export default function Dashboard() {
     if (isAuthenticated) {
       checkLinkedInStatus();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, checkLinkedInStatus]);
 
   if (!isAuthenticated) {
     return <LoadingSpinner message="Checking authentication..." />;

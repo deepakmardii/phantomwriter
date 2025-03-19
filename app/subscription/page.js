@@ -14,7 +14,7 @@ export default function Subscription() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.log('No authentication token found');
+        // console.log('No authentication token found');
         // Don't redirect immediately, let users view plans
       }
     } catch (error) {
