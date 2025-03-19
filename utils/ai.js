@@ -2,6 +2,73 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 
+export async function generateTopicWithAI(category) {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+    const categoryPrompts = {
+      'professional-advice':
+        'Generate professional advice topics related to career growth, leadership, or workplace excellence.',
+      'explanation-analysis':
+        'Generate topics that require in-depth explanation or analysis of business, tech, or industry concepts.',
+      'personal-story':
+        'Generate topics for sharing personal experiences or journeys in professional growth.',
+      'industry-trends':
+        'Generate topics about current trends, innovations, or changes in business or technology.',
+      'how-to-guide':
+        'Generate topics for practical guides or tutorials in professional development or technical skills.',
+      'case-study':
+        'Generate topics for analyzing business situations, project outcomes, or industry examples.',
+    };
+
+    const prompt = `Generate 5 distinct LinkedIn post topics based on this category: ${categoryPrompts[category] || 'Generate professional topics for LinkedIn'}.
+
+The topics should be:
+1. Specific and focused
+2. Relevant to professional audiences
+3. Timely and engaging
+4. Something that sparks discussion
+5. Each under 10 words
+
+Format: Return each topic on a new line, numbered 1-5, no additional context.
+
+Example:
+1. The Hidden Cost of Perfectionism in Tech Leadership
+2. Why Remote Teams Need Async Communication Culture
+3. Breaking Down Complex Projects: A Leader's Guide
+4. Building Trust in Cross-Functional Teams Today
+5. Data-Driven Decision Making: Beyond the Numbers`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text().trim();
+
+    // Process the response into individual topics
+    const topics = text
+      .split('\n')
+      .map(t => t.trim())
+      .filter(t => t && t.match(/^\d+\./)) // Keep only numbered lines
+      .map(t => t.replace(/^\d+\.\s*/, '')) // Remove numbering
+      .filter(t => t.length > 0); // Remove any empty lines
+
+    if (topics.length === 0) {
+      // If no properly formatted topics found, try to split by newlines
+      const fallbackTopics = text
+        .split('\n')
+        .map(t => t.trim())
+        .filter(t => t.length > 0)
+        .slice(0, 5);
+
+      return fallbackTopics.length > 0 ? fallbackTopics : [text.trim()];
+    }
+
+    return topics;
+  } catch (error) {
+    console.error('AI Topic Generation error:', error);
+    throw new Error('Failed to generate topics');
+  }
+}
+
 export async function generateLinkedInPost({ topic, tone, keywords = [], improvements }) {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
