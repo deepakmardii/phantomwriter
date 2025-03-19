@@ -131,8 +131,14 @@ export const authOptions = {
         session.user.name = token.name;
         session.user.subscription = token.subscription;
         session.user.provider = token.provider;
-        session.accessToken = token.jti;
-        session.token = jwt.sign(token, process.env.JWT_SECRET);
+        // Create a JWT with the required user ID field
+        session.token = jwt.sign(
+          {
+            id: token.id, // Ensure id is in the payload
+            sub: token.id, // Also include sub for compatibility
+          },
+          process.env.JWT_SECRET
+        );
       }
       return session;
     },

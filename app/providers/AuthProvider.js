@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user: session?.user || null,
-    token: session?.token || session?.accessToken || null,
+    token: session?.token || null,
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'loading',
     logout,
