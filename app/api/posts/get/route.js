@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { successResponse, withErrorHandling } from '@/utils/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   return withErrorHandling(async () => {
     // Get session

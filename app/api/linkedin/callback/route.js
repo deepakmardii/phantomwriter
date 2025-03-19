@@ -6,6 +6,8 @@ import { cookies } from 'next/headers';
 import dbConnect from '@/utils/db';
 import * as jose from 'jose';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);

@@ -4,6 +4,8 @@ import User from '@/models/User';
 import { successResponse, errorResponse, withErrorHandling } from '@/utils/api-helpers';
 import dbConnect from '@/utils/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   return withErrorHandling(async () => {
     const session = await getServerSession(authOptions);
