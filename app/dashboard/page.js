@@ -16,9 +16,13 @@ export default function Dashboard() {
   const [formData, setFormData] = useState({
     topic: '',
     tone: 'professional',
+    category: 'professional-advice',
     keywords: '',
+    topicMode: 'manual',
   });
+  const [suggestedTopics, setSuggestedTopics] = useState([]);
   const [generatingPost, setGeneratingPost] = useState(false);
+  const [generatingTopics, setGeneratingTopics] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
   const [improvements, setImprovements] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -31,6 +35,50 @@ export default function Dashboard() {
       [e.target.name]: e.target.value,
     }));
   }, []);
+
+  const generateTopics = async () => {
+    if (!token) {
+      showNotification('No authentication token found', 'error');
+      return;
+    }
+
+    setGeneratingTopics(true);
+    try {
+      const res = await fetch('/api/posts/generate-topic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category: formData.category,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to generate topics');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate topics');
+      }
+
+      console.log('API Response:', data);
+      // Convert object format to array if needed
+      const topicsArray = Array.isArray(data)
+        ? data
+        : Object.values(data).filter(value => typeof value === 'string');
+      setSuggestedTopics(topicsArray);
+      showNotification('Topics generated successfully', 'success');
+    } catch (err) {
+      console.error('Error generating topics:', err);
+      showNotification(err.message || 'Failed to generate topics', 'error');
+    } finally {
+      setGeneratingTopics(false);
+    }
+  };
 
   const generatePost = async data => {
     setGeneratingPost(true);
@@ -70,7 +118,9 @@ export default function Dashboard() {
       setFormData({
         topic: '',
         tone: 'professional',
+        category: 'professional-advice',
         keywords: '',
+        topicMode: 'manual',
       });
       setImprovements('');
 
@@ -88,7 +138,7 @@ export default function Dashboard() {
   };
 
   const handleSubmit = async e => {
-    e?.preventDefault(); // Make preventDefault optional for regeneration
+    e?.preventDefault();
     await generatePost(formData);
   };
 
@@ -108,7 +158,6 @@ export default function Dashboard() {
         topic: currentPost.topic,
         tone: currentPost.tone,
         keywords: currentPost.keywords.join(', '),
-        // Combine previous improvements with new ones if they exist
         improvements: improvements
           ? currentPost.improvements
             ? `${currentPost.improvements}, ${improvements}`
@@ -197,20 +246,144 @@ export default function Dashboard() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Post Generator</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
-                    Topic
+                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                    Post Category
                   </label>
-                  <input
-                    type="text"
-                    id="topic"
-                    name="topic"
-                    value={formData.topic}
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
                     onChange={handleChange}
-                    required
                     disabled={generatingPost}
-                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
-                    placeholder="E.g., Leadership in tech, Remote work challenges"
-                  />
+                    className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
+                  >
+                    <option value="professional-advice">Professional Advice</option>
+                    <option value="explanation-analysis">Explanation/Analysis</option>
+                    <option value="personal-story">Personal Story</option>
+                    <option value="industry-trends">Industry Trends</option>
+                    <option value="how-to-guide">How-to Guide</option>
+                    <option value="case-study">Case Study</option>
+                  </select>
+                </div>
+
+                {/* Topic Section */}
+                <div className="space-y-4">
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, topicMode: 'manual' }));
+                        setSuggestedTopics([]);
+                      }}
+                      className={`px-4 py-2 font-medium text-sm ${
+                        formData.topicMode === 'manual'
+                          ? 'text-orange-600 border-b-2 border-orange-500'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      Write Topic
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, topicMode: 'ai' }));
+                        setSuggestedTopics([]);
+                      }}
+                      className={`px-4 py-2 font-medium text-sm ${
+                        formData.topicMode === 'ai'
+                          ? 'text-orange-600 border-b-2 border-orange-500'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      AI Topics
+                    </button>
+                  </div>
+
+                  {formData.topicMode === 'manual' ? (
+                    <div>
+                      <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
+                        Write Your Topic
+                      </label>
+                      <input
+                        type="text"
+                        id="topic"
+                        name="topic"
+                        value={formData.topic}
+                        onChange={handleChange}
+                        required
+                        disabled={generatingPost}
+                        className="mt-2 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200 ease-in-out hover:border-gray-400"
+                        placeholder="E.g., Leadership in tech, Remote work challenges"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-sm font-medium text-gray-700">
+                          AI Generated Topics
+                        </label>
+                        <button
+                          type="button"
+                          onClick={generateTopics}
+                          disabled={generatingTopics}
+                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 text-sm"
+                        >
+                          {generatingTopics ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                                />
+                              </svg>
+                              Generate Topics
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {suggestedTopics.length > 0 ? (
+                        <div className="mt-4 space-y-2 border rounded-lg p-4 bg-gray-50">
+                          <div className="text-sm text-gray-500 mb-3">
+                            Click a topic to select it:
+                          </div>
+                          {suggestedTopics.map((topic, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, topic, topicMode: 'manual' }));
+                                setSuggestedTopics([]);
+                                showNotification('Topic selected', 'success');
+                              }}
+                              className="w-full text-left px-4 py-3 bg-white border border-gray-200 hover:bg-orange-50 hover:border-orange-200 text-gray-800 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+                            >
+                              {topic}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-4 text-center py-8 text-gray-500 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg">
+                          <p className="text-sm">
+                            Click &quot;Generate Topics&quot; to get AI suggestions based on your
+                            selected category
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div>
