@@ -20,9 +20,23 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: [
+      function () {
+        // Only require password for credentials provider and new documents
+        return this.provider === 'credentials' || (!this.provider && this.isNew);
+      },
+      'Please provide a password',
+    ],
     minlength: [6, 'Password must be at least 6 characters'],
     select: false,
+  },
+  provider: {
+    type: String,
+    enum: ['credentials', 'google'],
+    default: 'credentials',
+  },
+  image: {
+    type: String,
   },
   linkedinProfile: {
     type: String,

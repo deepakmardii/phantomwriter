@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/utils/db';
 import User from '@/models/User';
@@ -7,6 +8,10 @@ import { compare } from 'bcryptjs';
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -15,43 +20,32 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          console.log('Auth attempt for email:', credentials?.email);
-
           if (!credentials?.email || !credentials?.password) {
-            console.log('Missing email or password');
             throw new Error('Email and password required');
           }
 
           await dbConnect();
-          console.log('Connected to DB, searching for user...');
 
-          // Include password field explicitly since it's select: false by default
           const user = await User.findOne({ email: credentials.email }).select('+password');
-          console.log('User found?', !!user, 'Role:', user?.role);
 
           if (!user) {
-            console.log('User not found');
             throw new Error('Invalid credentials');
           }
 
           const isPasswordValid = await compare(credentials.password, user.password);
-          console.log('Password valid?', isPasswordValid);
 
           if (!isPasswordValid) {
-            console.log('Invalid password');
             throw new Error('Invalid credentials');
           }
 
-          // Don't include password in the returned user object
-          const userWithoutPassword = {
+          return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
             role: user.role,
             subscription: user.subscription,
+            provider: 'credentials',
           };
-
-          return userWithoutPassword;
         } catch (error) {
           console.error('Auth error:', error);
           return null;
@@ -60,15 +54,70 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async signIn({ user, account, profile }) {
+      if (account.provider === 'google') {
+        try {
+          await dbConnect();
+
+          // Check if user exists
+          let existingUser = await User.findOne({ email: profile.email });
+
+          if (existingUser) {
+            // Update existing user's Google-specific info
+            existingUser.image = profile.picture;
+            existingUser.name = profile.name;
+            existingUser.provider = 'google';
+            await existingUser.save({ validateBeforeSave: false });
+            return true;
+          }
+
+          // Create new user without validation since Google users don't need password
+          const newUser = new User({
+            email: profile.email,
+            name: profile.name,
+            image: profile.picture,
+            provider: 'google',
+            subscription: {
+              status: 'free',
+            },
+            role: 'user',
+          });
+
+          await newUser.save({ validateBeforeSave: false });
+          return true;
+        } catch (error) {
+          console.error('Google sign in error:', error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, trigger, session, account }) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.role = user.role;
-        token.subscription = user.subscription;
+        // If it's a Google sign in, fetch the user from DB to get complete data
+        if (account?.provider === 'google') {
+          await dbConnect();
+          const dbUser = await User.findOne({ email: user.email });
+          if (dbUser) {
+            token.id = dbUser._id.toString();
+            token.email = dbUser.email;
+            token.name = dbUser.name;
+            token.role = dbUser.role;
+            token.subscription = dbUser.subscription;
+            token.provider = dbUser.provider;
+            token.image = dbUser.image;
+          }
+        } else {
+          // For credentials provider, use the user object directly
+          token.id = user.id;
+          token.email = user.email;
+          token.role = user.role;
+          token.subscription = user.subscription;
+          token.provider = user.provider;
+          token.name = user.name;
+        }
       }
 
-      // Handle updates to the session
       if (trigger === 'update' && session?.name) {
         token.name = session.name;
       }
@@ -81,18 +130,16 @@ export const authOptions = {
         session.user.role = token.role;
         session.user.name = token.name;
         session.user.subscription = token.subscription;
-        // Include both the raw JWT token and the token object
+        session.user.provider = token.provider;
         session.accessToken = token.jti;
         session.token = jwt.sign(token, process.env.JWT_SECRET);
       }
       return session;
     },
     async encode({ secret, token }) {
-      // Use our JWT_SECRET for consistency with our API auth
       return jwt.sign(token, process.env.JWT_SECRET);
     },
     async decode({ secret, token }) {
-      // Use our JWT_SECRET for consistency with our API auth
       return jwt.verify(token, process.env.JWT_SECRET);
     },
   },
