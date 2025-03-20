@@ -155,9 +155,9 @@ export default function Settings() {
       <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
           {/* User Details Section */}
-          <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
+          <div className="bg-white px-4 sm:px-6 py-4 sm:py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">User Details</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -211,8 +211,8 @@ export default function Settings() {
           </div>
 
           {/* Change Password Section */}
-          <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white px-4 sm:px-6 py-4 sm:py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
               {!session?.user?.hasPassword ? 'Set Up Password' : 'Change Password'}
             </h2>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">

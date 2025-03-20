@@ -9,9 +9,13 @@ export default function LayoutWrapper({ children }) {
   const isAdminRoute = pathname?.startsWith('/admin');
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       {user && !isAdminRoute && <Navbar />}
-      <main className={`flex-1 min-h-screen ${user && !isAdminRoute ? 'ml-64' : ''}`}>
+      <main
+        className={`flex-1 transition-[margin] duration-300 ease-in-out
+          ${user && !isAdminRoute ? 'lg:ml-64' : ''}
+          p-4 lg:p-8`}
+      >
         {children}
       </main>
     </div>

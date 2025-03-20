@@ -209,15 +209,15 @@ export default function PostList() {
           className="bg-white p-4 rounded-lg border border-gray hover:shadow-lg transition-all"
         >
           <p className="text-gray-700 mb-2 whitespace-pre-wrap">{post.content}</p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-600">
-              <span className="mr-4">Topic: {post.topic}</span>
-              <span className="mr-4">Tone: {post.tone}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-600 gap-2 sm:gap-4">
+              <span>Topic: {post.topic}</span>
+              <span>Tone: {post.tone}</span>
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               {post.keywords?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 max-w-full">
                   {post.keywords.map((keyword, index) => (
                     <span
                       key={index}

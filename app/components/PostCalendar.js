@@ -89,17 +89,21 @@ export default function PostCalendar({ posts }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 mb-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <div key={day} className="text-center text-gray-600 font-medium py-2">
-            {day}
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.slice(0, 1)}</span>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {[...Array(firstDayOfMonth)].map((_, index) => (
-          <div key={`empty-${index}`} className="h-24 bg-white rounded-lg border border-gray"></div>
+          <div
+            key={`empty-${index}`}
+            className="h-16 sm:h-24 bg-white rounded-lg border border-gray"
+          ></div>
         ))}
 
         {[...Array(daysInMonth)].map((_, index) => {
@@ -109,16 +113,18 @@ export default function PostCalendar({ posts }) {
           return (
             <div
               key={day}
-              className="h-24 bg-white rounded-lg p-2 overflow-y-auto relative border border-gray hover:shadow-sm transition-shadow"
+              className="h-16 sm:h-24 bg-white rounded-lg p-1 sm:p-2 overflow-y-auto relative border border-gray hover:shadow-sm transition-shadow"
             >
-              <div className="text-gray-600 mb-1 flex items-center">
+              <div className="text-gray-600 mb-1 flex items-center text-xs sm:text-sm">
                 {day}
-                {isToday(day) && <div className="w-2 h-2 rounded-full bg-orange-500 ml-2"></div>}
+                {isToday(day) && (
+                  <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-orange-500 ml-1 sm:ml-2"></div>
+                )}
               </div>
               {dayPosts.map(post => (
                 <div
                   key={post._id}
-                  className="bg-orange-500/10 p-2 rounded-lg mb-1 text-sm text-gray-700 hover:bg-orange-500/20 transition-colors"
+                  className="bg-orange-500/10 p-1 sm:p-2 rounded-lg mb-1 text-xs sm:text-sm text-gray-700 hover:bg-orange-500/20 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-1">
