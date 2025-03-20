@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ubuntu
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          mkdir -p ~/.ssh
+          echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+          # Stop the existing PM2 process if it exists
+          ssh -i private_key ${USER}@${HOST} 'pm2 delete phantomwriter || true'
+          # Create the app directory if it doesn't exist
+          ssh -i private_key ${USER}@${HOST} 'mkdir -p ~/phantomwriter'
+          # Copy the built application
+          rsync -avz -e "ssh -i private_key" .next package*.json ./scripts ./public ${USER}@${HOST}:~/phantomwriter/
+          # Install production dependencies and start the application
+          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && npm install --production && pm2 start npm --name "phantomwriter" -- start'
+          rm -f private_key
