@@ -57,12 +57,30 @@ jobs:
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           mkdir -p ~/.ssh
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-          # Stop the existing PM2 process if it exists
-          ssh -i private_key ${USER}@${HOST} 'pm2 delete phantomwriter || true'
-          # Create the app directory if it doesn't exist
+
+          # Create deployment script
+          cat << 'EOF' > deploy.sh
+          #!/bin/bash
+
+          # Kill existing Node.js process if running
+          pkill -f "node server.js" || true
+
+          # Create app directory if it doesn't exist
+          mkdir -p ~/phantomwriter
+
+          # Start the Next.js application in the background using nohup
+          cd ~/phantomwriter
+          nohup npm start > app.log 2>&1 &
+
+          echo "Application deployed and started"
+          EOF
+
+          # Copy the built application and deployment script
           ssh -i private_key ${USER}@${HOST} 'mkdir -p ~/phantomwriter'
-          # Copy the built application
           rsync -avz -e "ssh -i private_key" .next package*.json ./scripts ./public ${USER}@${HOST}:~/phantomwriter/
-          # Install production dependencies and start the application
-          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && npm install --production && pm2 start npm --name "phantomwriter" -- start'
-          rm -f private_key
+          scp -i private_key deploy.sh ${USER}@${HOST}:~/phantomwriter/
+
+          # Execute deployment script
+          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && chmod +x deploy.sh && ./deploy.sh'
+
+          rm -f private_key deploy.sh
