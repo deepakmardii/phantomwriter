@@ -63,7 +63,20 @@ jobs:
           # Create start script
           cat > start.sh << 'EOL'
           #!/bin/bash
+
+          # Kill any process using port 3000
+          kill $(lsof -t -i:3000) 2>/dev/null || true
+
+          # Kill any existing node processes for this app
+          pkill -f "node.*phantomwriter" || true
+
+          # Wait a moment for processes to clean up
+          sleep 2
+
+          # Load environment variables
           export $(cat .env | xargs)
+
+          # Start the application
           npm start
           EOL
 
@@ -95,8 +108,10 @@ jobs:
             cd ~/phantomwriter
             chmod +x start.sh
             npm install --production
-            pkill -f "node server.js" || true
+            sudo apt-get install -y lsof
             nohup ./start.sh > app.log 2>&1 &
+            sleep 5
+            cat app.log
           ENDSSH
 
           # Cleanup
