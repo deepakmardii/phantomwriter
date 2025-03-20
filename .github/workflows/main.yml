@@ -53,33 +53,47 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
           USER: ubuntu
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          NEXT_PUBLIC_RAZORPAY_KEY_ID: ${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }}
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           mkdir -p ~/.ssh
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-          # Create deployment script
-          cat << 'EOF' > deploy.sh
-          #!/bin/bash
+          # Create .env file
+          echo "MONGODB_URI=\"$MONGODB_URI\"
+          JWT_SECRET=\"$JWT_SECRET\"
+          NEXTAUTH_SECRET=\"$NEXTAUTH_SECRET\"
+          NEXTAUTH_URL=\"$NEXTAUTH_URL\"
+          RAZORPAY_KEY_ID=\"$RAZORPAY_KEY_ID\"
+          RAZORPAY_KEY_SECRET=\"$RAZORPAY_KEY_SECRET\"
+          NEXT_PUBLIC_RAZORPAY_KEY_ID=\"$NEXT_PUBLIC_RAZORPAY_KEY_ID\"
+          GOOGLE_AI_API_KEY=\"$GOOGLE_AI_API_KEY\"
+          ADMIN_EMAIL=\"$ADMIN_EMAIL\"
+          ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"
+          LINKEDIN_CLIENT_ID=\"$LINKEDIN_CLIENT_ID\"
+          LINKEDIN_CLIENT_SECRET=\"$LINKEDIN_CLIENT_SECRET\"
+          NEXT_PUBLIC_APP_URL=\"$NEXT_PUBLIC_APP_URL\"" > .env
 
-          # Kill existing Node.js process if running
-          pkill -f "node server.js" || true
-
-          # Create app directory if it doesn't exist
-          mkdir -p ~/phantomwriter
-
-          # Start the Next.js application in the background using nohup
-          cd ~/phantomwriter
-          nohup npm start > app.log 2>&1 &
-
-          echo "Application deployed and started"
-          EOF
-
-          # Copy the entire project except node_modules and .git
+          # Copy the built application and .env
           ssh -i private_key ${USER}@${HOST} 'mkdir -p ~/phantomwriter'
           rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i private_key" ./ ${USER}@${HOST}:~/phantomwriter/
 
-          # Make deploy script executable and run it
-          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && chmod +x deploy.sh && ./deploy.sh'
+          # Kill existing Node.js process if running
+          ssh -i private_key ${USER}@${HOST} 'pkill -f "node server.js" || true'
 
-          rm -f private_key deploy.sh
+          # Start the Next.js application
+          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && npm install --production && nohup npm start > app.log 2>&1 &'
+
+          rm -f private_key
