@@ -9,6 +9,10 @@ import LinkedInToken from '@/models/LinkedInToken';
 import { createPost, getUserInfo } from '@/utils/linkedin';
 
 export async function POST(request) {
+  let post;
+  let user;
+  let content;
+
   try {
     await dbConnect();
 
@@ -17,7 +21,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await User.findById(session.user.id);
+    user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -60,7 +64,7 @@ export async function POST(request) {
       hasLinkedInToken: !!linkedInToken?.accessToken,
     });
 
-    const content = formData.get('content');
+    content = formData.get('content');
     if (!content?.trim()) {
       return NextResponse.json(
         { error: 'Content is required and cannot be empty' },
