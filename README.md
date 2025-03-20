@@ -1,4 +1,4 @@
-# PhantomWriter - AI LinkedIn Post Generator
+# PhantomWriter - AI LinkedIn Post Generator (CI/CD Working)
 
 PhantomWriter is a powerful web application that helps professionals maintain a consistent LinkedIn presence by generating high-quality posts using AI. The application offers features like content generation with different tones, subscription management, and post history tracking.
 
