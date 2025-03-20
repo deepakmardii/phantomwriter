@@ -99,21 +99,21 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Timezone is required for scheduling' }, { status: 400 });
       }
 
-      // Parse date with timezone
-      const scheduledDate = new Date(
-        new Date(scheduledFor).toLocaleString('en-US', { timeZone: timezone })
-      );
+      // Convert the local time to UTC
+      const localDate = new Date(scheduledFor);
+      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+
       const now = new Date();
       const minScheduleTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
 
-      if (scheduledDate <= now) {
+      if (utcDate <= now) {
         return NextResponse.json(
           { error: 'Scheduled date must be in the future' },
           { status: 400 }
         );
       }
 
-      if (scheduledDate < minScheduleTime) {
+      if (utcDate < minScheduleTime) {
         return NextResponse.json(
           { error: 'Please schedule at least 5 minutes in advance to ensure proper processing' },
           { status: 400 }
@@ -126,7 +126,7 @@ export async function POST(request) {
           user: user._id,
           content,
           isScheduled: true,
-          scheduledFor: scheduledDate,
+          scheduledFor: utcDate,
           topic: formData.get('topic') || 'Scheduled Post',
           tone: formData.get('tone') || 'professional',
         });
