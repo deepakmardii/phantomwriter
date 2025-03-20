@@ -30,7 +30,7 @@ export async function GET() {
       // Remove Secure flag since we're using HTTP
       `SameSite=Lax`,
       // Add domain for your EC2
-      `Domain=13.126.32.219`,
+      `Domain=postiffy.arcsdesign.in`,
     ].join('; ');
 
     return new Response(JSON.stringify({ url: authUrl }), {

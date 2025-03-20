@@ -31,7 +31,7 @@ export async function GET(request) {
       'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
       'HttpOnly',
       'SameSite=Lax',
-      'Domain=13.126.32.219',
+      'Domain=postiffy.arcsdesign.in',
     ].join('; ');
 
     if (error) {
