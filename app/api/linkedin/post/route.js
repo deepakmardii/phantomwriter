@@ -27,18 +27,10 @@ export async function POST(request) {
     }
 
     const linkedInToken = await LinkedInToken.findOne({ user: user._id });
-    // Debug log the token status
-    console.log('LinkedIn post attempt:', {
-      userId: session.user.id,
+    console.log('LinkedIn token status:', {
+      userId: user._id,
       hasToken: !!linkedInToken,
-      tokenData: linkedInToken
-        ? {
-            accessToken: !!linkedInToken.accessToken,
-            createdAt: linkedInToken.createdAt,
-            expiresAt: linkedInToken.expiresAt,
-            isExpired: linkedInToken.isExpired?.(),
-          }
-        : null,
+      expiresAt: linkedInToken?.expiresAt,
     });
 
     if (!linkedInToken?.accessToken) {
@@ -53,17 +45,6 @@ export async function POST(request) {
     }
 
     const formData = await request.formData();
-    // Debug log the form data and user info
-    console.log('Form data and auth info:', {
-      content: formData.get('content'),
-      image: formData.get('image')?.name,
-      isScheduled: formData.get('isScheduled'),
-      scheduledFor: formData.get('scheduledFor'),
-      timezone: formData.get('timezone'),
-      userId: session?.user?.id,
-      hasLinkedInToken: !!linkedInToken?.accessToken,
-    });
-
     content = formData.get('content');
     if (!content?.trim()) {
       return NextResponse.json(
@@ -73,25 +54,19 @@ export async function POST(request) {
     }
 
     // Validate LinkedIn token
-    if (linkedInToken?.accessToken) {
-      console.log('LinkedIn token found, validating...');
-      try {
-        // Test token by getting user info
-        await getUserInfo(linkedInToken.accessToken);
-      } catch (error) {
-        console.error('LinkedIn token validation failed:', error);
-        return NextResponse.json(
-          { error: 'LinkedIn authentication failed. Please reconnect your LinkedIn account.' },
-          { status: 401 }
-        );
-      }
+    try {
+      await getUserInfo(linkedInToken.accessToken);
+    } catch (error) {
+      console.error('LinkedIn token validation failed:', error);
+      return NextResponse.json(
+        { error: 'LinkedIn authentication failed. Please reconnect your LinkedIn account.' },
+        { status: 401 }
+      );
     }
 
     const image = formData.get('image');
     const isScheduled = formData.get('isScheduled') === 'true';
     const scheduledFor = formData.get('scheduledFor');
-
-    let post;
 
     if (isScheduled && scheduledFor) {
       const timezone = formData.get('timezone');
@@ -102,6 +77,12 @@ export async function POST(request) {
       // Convert the local time to UTC
       const localDate = new Date(scheduledFor);
       const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+
+      console.log('Scheduling post:', {
+        localTime: localDate.toISOString(),
+        utcTime: utcDate.toISOString(),
+        timezone,
+      });
 
       const now = new Date();
       const minScheduleTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
@@ -121,7 +102,6 @@ export async function POST(request) {
       }
 
       try {
-        // Create a scheduled post
         post = await Post.create({
           user: user._id,
           content,
@@ -130,11 +110,23 @@ export async function POST(request) {
           topic: formData.get('topic') || 'Scheduled Post',
           tone: formData.get('tone') || 'professional',
         });
+
+        console.log('Created scheduled post:', {
+          postId: post._id,
+          scheduledFor: utcDate.toISOString(),
+        });
       } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 400 });
       }
 
-      return NextResponse.json({ message: 'Post scheduled successfully', post });
+      return NextResponse.json({
+        message: 'Post scheduled successfully',
+        post,
+        scheduledTime: {
+          utc: utcDate.toISOString(),
+          local: localDate.toISOString(),
+        },
+      });
     } else {
       // Share immediately
       let imageBuffer = null;
@@ -146,9 +138,14 @@ export async function POST(request) {
         imageType = image.type;
       }
 
-      const response = await createPost(linkedInToken.accessToken, content, imageBuffer, imageType);
+      try {
+        const response = await createPost(
+          linkedInToken.accessToken,
+          content,
+          imageBuffer,
+          imageType
+        );
 
-      if (response.success) {
         post = await Post.create({
           user: user._id,
           content,
@@ -158,36 +155,54 @@ export async function POST(request) {
           isPublished: true,
           publishedAt: new Date(),
         });
-      }
 
-      return NextResponse.json({ message: 'Post shared successfully', post });
+        console.log('Successfully shared post:', {
+          postId: post._id,
+          linkedinPostId: response.postId,
+        });
+
+        return NextResponse.json({
+          message: 'Post shared successfully',
+          post,
+          linkedinPostId: response.postId,
+        });
+      } catch (error) {
+        if (error.message.includes('duplicate')) {
+          const linkedinId = error.message.match(/urn:li:share:(\d+)/)?.[1];
+          console.log('Duplicate post detected:', {
+            linkedinId,
+            content: content.substring(0, 50) + '...',
+          });
+
+          post = await Post.create({
+            user: user._id,
+            content,
+            topic: 'Direct Share',
+            tone: 'professional',
+            linkedinPostId: linkedinId || 'duplicate-post',
+            isPublished: true,
+            publishedAt: new Date(),
+            status: 'duplicate',
+          });
+
+          return NextResponse.json(
+            {
+              message: 'This content was already shared on LinkedIn',
+              post,
+              linkedinId,
+              status: 'duplicate',
+            },
+            { status: 200 }
+          );
+        }
+        throw error;
+      }
     }
   } catch (error) {
-    console.error('Error in LinkedIn post route:', error);
-
-    // Handle duplicate content error
-    if (error.message.includes('duplicate')) {
-      // Still create the post in our database
-      post = await Post.create({
-        user: user._id,
-        content,
-        topic: 'Direct Share',
-        tone: 'professional',
-        isPublished: false, // Mark as not published since LinkedIn rejected it
-        publishedAt: new Date(),
-        error: 'LinkedIn rejected as duplicate content',
-      });
-
-      return NextResponse.json(
-        { error: 'This content has already been posted to LinkedIn', post },
-        { status: 400 }
-      );
-    }
-
-    // For other errors
+    console.error('LinkedIn post error:', error);
     return NextResponse.json(
       {
-        error: 'Failed to post to LinkedIn: ' + error.message,
+        error: 'Failed to process LinkedIn post: ' + error.message,
         details: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }

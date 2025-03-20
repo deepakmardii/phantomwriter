@@ -38,25 +38,15 @@ export async function POST(request) {
         postScheduledTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
       );
 
-      console.log('Post scheduling details:', {
+      console.log('Processing scheduled post:', {
         id: post._id,
-        content: post.content.slice(0, 30),
-        timezone: post.timezone,
+        content: post.content.slice(0, 30) + '...',
         scheduledFor: {
           utc: postScheduledTime.toISOString(),
           ist: postIstTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
         },
-        currentTime: {
-          utc: now.toISOString(),
-          ist: istTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
-        },
-        timeDiff: Math.floor((now - postScheduledTime) / 1000) + ' seconds',
       });
     });
-
-    console.log(
-      `Found ${scheduledPosts.length} scheduled posts to process at ${istTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`
-    );
 
     const results = [];
 
@@ -81,22 +71,24 @@ export async function POST(request) {
             publishedAt: new Date(),
           });
 
+          console.log('Successfully published post:', {
+            postId: post._id,
+            linkedinPostId: response.postId,
+          });
+
           results.push({
             postId: post._id,
             status: 'success',
             linkedinPostId: response.postId,
           });
         } catch (error) {
-          console.log('Processing error for post:', {
-            postId: post._id,
-            error: error.message,
-            isDuplicate: error.message?.includes('duplicate'),
-          });
-
           // Check if error is due to duplicate content
           if (error.message?.includes('duplicate')) {
             const linkedinId = error.message.match(/urn:li:share:(\d+)/)?.[1];
-            console.log('Found duplicate post with LinkedIn ID:', linkedinId);
+            console.log('Post already exists on LinkedIn:', {
+              postId: post._id,
+              linkedinId: linkedinId,
+            });
 
             const updateResult = await Post.findByIdAndUpdate(
               post._id,
@@ -105,19 +97,13 @@ export async function POST(request) {
                 publishedAt: new Date(),
                 linkedinPostId: linkedinId || 'duplicate-post',
               },
-              { new: true } // Return updated document
+              { new: true }
             );
-
-            console.log('Updated post status:', {
-              postId: post._id,
-              isPublished: updateResult.isPublished,
-              linkedinPostId: updateResult.linkedinPostId,
-            });
 
             results.push({
               postId: post._id,
               status: 'success',
-              message: 'Post was already shared',
+              message: 'Post was already shared on LinkedIn',
               linkedinId,
             });
 
@@ -128,7 +114,7 @@ export async function POST(request) {
           }
         }
       } catch (error) {
-        console.error(`Error processing scheduled post ${post._id}:`, error);
+        console.error(`Error processing post ${post._id}:`, error.message);
         results.push({
           postId: post._id,
           status: 'error',
@@ -138,7 +124,7 @@ export async function POST(request) {
     }
 
     return NextResponse.json({
-      message: `Processed ${scheduledPosts.length} scheduled posts`,
+      message: `Successfully processed ${scheduledPosts.length} scheduled posts`,
       results,
     });
   } catch (error) {
