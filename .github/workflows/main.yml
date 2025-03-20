@@ -75,12 +75,11 @@ jobs:
           echo "Application deployed and started"
           EOF
 
-          # Copy the built application and deployment script
+          # Copy the entire project except node_modules and .git
           ssh -i private_key ${USER}@${HOST} 'mkdir -p ~/phantomwriter'
-          rsync -avz -e "ssh -i private_key" .next package*.json ./scripts ./public ${USER}@${HOST}:~/phantomwriter/
-          scp -i private_key deploy.sh ${USER}@${HOST}:~/phantomwriter/
+          rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i private_key" ./ ${USER}@${HOST}:~/phantomwriter/
 
-          # Execute deployment script
+          # Make deploy script executable and run it
           ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && chmod +x deploy.sh && ./deploy.sh'
 
           rm -f private_key deploy.sh
