@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  throw new Error('Please define the MONGODB_URI environment variable');
 }
 
 let cached = global.mongoose;
@@ -90,6 +90,7 @@ const dbConnect = async (retries = 5) => {
 
         return connection;
       } catch (error) {
+        console.error('MongoDB connection error:', error);
         if (retriesLeft > 0) {
           console.log(`MongoDB connection failed, retrying... (${retriesLeft} attempts left)`);
           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
