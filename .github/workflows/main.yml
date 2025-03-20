@@ -53,47 +53,43 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
           USER: ubuntu
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
-          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
-          NEXT_PUBLIC_RAZORPAY_KEY_ID: ${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }}
-          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
-          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
-          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          # Setup SSH
+          echo "$PRIVATE_KEY" > private_key
+          chmod 600 private_key
           mkdir -p ~/.ssh
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-          # Create .env file
-          echo "MONGODB_URI=\"$MONGODB_URI\"
-          JWT_SECRET=\"$JWT_SECRET\"
-          NEXTAUTH_SECRET=\"$NEXTAUTH_SECRET\"
-          NEXTAUTH_URL=\"$NEXTAUTH_URL\"
-          RAZORPAY_KEY_ID=\"$RAZORPAY_KEY_ID\"
-          RAZORPAY_KEY_SECRET=\"$RAZORPAY_KEY_SECRET\"
-          NEXT_PUBLIC_RAZORPAY_KEY_ID=\"$NEXT_PUBLIC_RAZORPAY_KEY_ID\"
-          GOOGLE_AI_API_KEY=\"$GOOGLE_AI_API_KEY\"
-          ADMIN_EMAIL=\"$ADMIN_EMAIL\"
-          ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"
-          LINKEDIN_CLIENT_ID=\"$LINKEDIN_CLIENT_ID\"
-          LINKEDIN_CLIENT_SECRET=\"$LINKEDIN_CLIENT_SECRET\"
-          NEXT_PUBLIC_APP_URL=\"$NEXT_PUBLIC_APP_URL\"" > .env
+          # Create .env file content
+          cat > .env << EOL
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+          RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}
+          NEXT_PUBLIC_RAZORPAY_KEY_ID=${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }}
+          GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}
+          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          LINKEDIN_CLIENT_ID=${{ secrets.LINKEDIN_CLIENT_ID }}
+          LINKEDIN_CLIENT_SECRET=${{ secrets.LINKEDIN_CLIENT_SECRET }}
+          NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }}
+          EOL
 
-          # Copy the built application and .env
-          ssh -i private_key ${USER}@${HOST} 'mkdir -p ~/phantomwriter'
+          # Ensure target directory exists
+          ssh -i private_key ${USER}@${HOST} "mkdir -p ~/phantomwriter"
+
+          # Copy files
           rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i private_key" ./ ${USER}@${HOST}:~/phantomwriter/
 
-          # Kill existing Node.js process if running
-          ssh -i private_key ${USER}@${HOST} 'pkill -f "node server.js" || true'
+          # Execute commands on remote server
+          ssh -i private_key ${USER}@${HOST} 'bash -s' << 'ENDSSH'
+            cd ~/phantomwriter
+            npm install --production
+            pkill -f "node server.js" || true
+            nohup npm start > app.log 2>&1 &
+          ENDSSH
 
-          # Start the Next.js application
-          ssh -i private_key ${USER}@${HOST} 'cd ~/phantomwriter && npm install --production && nohup npm start > app.log 2>&1 &'
-
+          # Cleanup
           rm -f private_key
