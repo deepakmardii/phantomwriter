@@ -60,6 +60,13 @@ jobs:
           mkdir -p ~/.ssh
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
+          # Create start script
+          cat > start.sh << 'EOL'
+          #!/bin/bash
+          export $(cat .env | xargs)
+          npm start
+          EOL
+
           # Create .env file content
           cat > .env << EOL
           MONGODB_URI=${{ secrets.MONGODB_URI }}
@@ -86,9 +93,10 @@ jobs:
           # Execute commands on remote server
           ssh -i private_key ${USER}@${HOST} 'bash -s' << 'ENDSSH'
             cd ~/phantomwriter
+            chmod +x start.sh
             npm install --production
             pkill -f "node server.js" || true
-            nohup npm start > app.log 2>&1 &
+            nohup ./start.sh > app.log 2>&1 &
           ENDSSH
 
           # Cleanup
