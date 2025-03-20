@@ -159,22 +159,32 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Post shared successfully', post });
     }
   } catch (error) {
-    console.error('Error in LinkedIn post route:', {
-      error,
-      session: await getServerSession(authOptions),
-      formData: request.formData ? await request.formData() : null,
-    });
+    console.error('Error in LinkedIn post route:', error);
 
+    // Handle duplicate content error
+    if (error.message.includes('duplicate')) {
+      // Still create the post in our database
+      post = await Post.create({
+        user: user._id,
+        content,
+        topic: 'Direct Share',
+        tone: 'professional',
+        isPublished: false, // Mark as not published since LinkedIn rejected it
+        publishedAt: new Date(),
+        error: 'LinkedIn rejected as duplicate content',
+      });
+
+      return NextResponse.json(
+        { error: 'This content has already been posted to LinkedIn', post },
+        { status: 400 }
+      );
+    }
+
+    // For other errors
     return NextResponse.json(
       {
-        error: error.message,
-        details:
-          process.env.NODE_ENV === 'development'
-            ? {
-                name: error.name,
-                stack: error.stack,
-              }
-            : undefined,
+        error: 'Failed to post to LinkedIn: ' + error.message,
+        details: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }
     );

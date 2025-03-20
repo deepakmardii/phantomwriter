@@ -24,10 +24,10 @@ export async function PUT(req) {
 
     // Handle password update
     if (data.newPassword) {
-      // For Google users setting up password for the first time
-      if (data.isGoogleUser && user.provider === 'google' && !user.password) {
+      // For users setting up password for the first time
+      if (!session.user.hasPassword) {
         user.password = data.newPassword;
-        user.provider = 'credentials'; // Allow them to use either Google or password
+        // Keep the original provider, the presence of password indicates dual auth
         await user.save();
 
         return Response.json({
@@ -52,7 +52,7 @@ export async function PUT(req) {
         );
       }
 
-      // Update password
+      // Update password only
       user.password = data.newPassword;
       await user.save();
 

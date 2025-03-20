@@ -66,7 +66,12 @@ export const authOptions = {
             // Update existing user's Google-specific info
             existingUser.image = profile.picture;
             existingUser.name = profile.name;
-            existingUser.provider = 'google';
+            // If user has a password, mark as dual provider
+            if (existingUser.password) {
+              existingUser.provider = 'dual';
+            } else {
+              existingUser.provider = 'google';
+            }
             await existingUser.save({ validateBeforeSave: false });
             return true;
           }
@@ -97,7 +102,7 @@ export const authOptions = {
         // If it's a Google sign in, fetch the user from DB to get complete data
         if (account?.provider === 'google') {
           await dbConnect();
-          const dbUser = await User.findOne({ email: user.email });
+          const dbUser = await User.findOne({ email: user.email }).select('+password');
           if (dbUser) {
             token.id = dbUser._id.toString();
             token.email = dbUser.email;
@@ -106,6 +111,7 @@ export const authOptions = {
             token.subscription = dbUser.subscription;
             token.provider = dbUser.provider;
             token.image = dbUser.image;
+            token.hasPassword = !!dbUser.password;
           }
         } else {
           // For credentials provider, use the user object directly
@@ -131,6 +137,7 @@ export const authOptions = {
         session.user.name = token.name;
         session.user.subscription = token.subscription;
         session.user.provider = token.provider;
+        session.user.hasPassword = token.hasPassword;
         // Create a JWT with the required user ID field
         session.token = jwt.sign(
           {

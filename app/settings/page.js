@@ -28,12 +28,11 @@ export default function Settings() {
   const isNameChanged = formData.name !== originalName;
 
   // Track if all password fields are filled
-  const arePasswordFieldsComplete =
-    session?.user?.provider === 'google' && !user.password
-      ? passwordData.newPassword.trim() !== '' && passwordData.confirmPassword.trim() !== ''
-      : passwordData.currentPassword.trim() !== '' &&
-        passwordData.newPassword.trim() !== '' &&
-        passwordData.confirmPassword.trim() !== '';
+  const arePasswordFieldsComplete = !session?.user?.hasPassword
+    ? passwordData.newPassword.trim() !== '' && passwordData.confirmPassword.trim() !== ''
+    : passwordData.currentPassword.trim() !== '' &&
+      passwordData.newPassword.trim() !== '' &&
+      passwordData.confirmPassword.trim() !== '';
 
   // Update form data when user data is available
   useEffect(() => {
@@ -113,7 +112,8 @@ export default function Settings() {
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
-          isGoogleUser: session?.user?.provider === 'google' && !user.password,
+          // Only include current password if user already has a password
+          ...(session?.user?.hasPassword ? { currentPassword: passwordData.currentPassword } : {}),
         }),
       });
 
@@ -127,8 +127,18 @@ export default function Settings() {
         newPassword: '',
         confirmPassword: '',
       });
+
+      // Update session to reflect new password state
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          hasPassword: true,
+        },
+      });
+
       showNotification(
-        session?.user?.provider === 'google' && !user.password
+        !session?.user?.hasPassword
           ? 'Password set up successfully'
           : 'Password updated successfully',
         'success'
@@ -178,9 +188,11 @@ export default function Settings() {
                   <label className="block text-sm font-medium text-gray-700">Sign in method</label>
                   <div className="mt-1">
                     <p className="text-sm text-gray-600">
-                      {session?.user?.provider === 'google'
-                        ? 'Google Account'
-                        : 'Email and Password'}
+                      {session?.user?.provider === 'dual'
+                        ? 'Google Account and Email/Password'
+                        : session?.user?.provider === 'google'
+                          ? 'Google Account'
+                          : 'Email and Password'}
                     </p>
                   </div>
                 </div>
@@ -201,12 +213,10 @@ export default function Settings() {
           {/* Change Password Section */}
           <div className="bg-white px-6 py-6 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              {session?.user?.provider === 'google' && !user.password
-                ? 'Set Up Password'
-                : 'Change Password'}
+              {!session?.user?.hasPassword ? 'Set Up Password' : 'Change Password'}
             </h2>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              {session?.user?.provider === 'google' && !user.password ? (
+              {!session?.user?.hasPassword ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                   <p className="text-sm text-blue-700">
                     Setting up a password will allow you to sign in with your email and password in
@@ -215,7 +225,7 @@ export default function Settings() {
                 </div>
               ) : null}
 
-              {session?.user?.provider !== 'google' || user.password ? (
+              {session?.user?.hasPassword ? (
                 <div>
                   <label
                     htmlFor="currentPassword"
@@ -281,10 +291,10 @@ export default function Settings() {
                   className="w-full sm:w-auto flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:translate-y-[-1px]"
                 >
                   {loading
-                    ? session?.user?.provider === 'google' && !user.password
+                    ? !session?.user?.hasPassword
                       ? 'Setting up...'
                       : 'Updating...'
-                    : session?.user?.provider === 'google' && !user.password
+                    : !session?.user?.hasPassword
                       ? 'Set Up Password'
                       : 'Update Password'}
                 </button>
