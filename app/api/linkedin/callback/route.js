@@ -24,16 +24,22 @@ export async function GET(request) {
     const cookieStore = cookies();
     const storedState = cookieStore.get('linkedin_state')?.value;
 
-    // Clear the state cookie
-    const clearCookie =
-      'linkedin_state=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Lax';
+    // Clear the state cookie with same options as setting it
+    const clearCookieOptions = [
+      'linkedin_state=',
+      'Path=/',
+      'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+      'HttpOnly',
+      'SameSite=Lax',
+      'Domain=13.126.32.219',
+    ].join('; ');
 
     if (error) {
       return new Response(JSON.stringify({ error: 'Authorization denied' }), {
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Set-Cookie': clearCookie,
+          'Set-Cookie': clearCookieOptions,
         },
       });
     }
@@ -44,7 +50,7 @@ export async function GET(request) {
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Set-Cookie': clearCookie,
+          'Set-Cookie': clearCookieOptions,
         },
       });
     }
@@ -54,7 +60,7 @@ export async function GET(request) {
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Set-Cookie': clearCookie,
+          'Set-Cookie': clearCookieOptions,
         },
       });
     }
@@ -92,7 +98,7 @@ export async function GET(request) {
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          'Set-Cookie': clearCookie,
+          'Set-Cookie': clearCookieOptions,
         },
       });
     }
@@ -113,20 +119,15 @@ export async function GET(request) {
       { upsert: true, new: true }
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
+    // Redirect to the settings page with success status
+    return Response.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?linkedin=success`, {
       headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': clearCookie,
+        'Set-Cookie': clearCookieOptions,
       },
     });
   } catch (error) {
     console.error('LinkedIn callback error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to complete LinkedIn authorization' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Redirect to the settings page with error status
+    return Response.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?linkedin=error`);
   }
 }
