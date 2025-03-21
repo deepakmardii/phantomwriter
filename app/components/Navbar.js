@@ -26,47 +26,52 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={`lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl
-          ${
-            isMobileMenuOpen
-              ? 'bg-orange-500 text-white shadow-orange-200'
-              : 'bg-white text-gray-800'
-          }
-          shadow-lg border border-gray-200 hover:scale-105 active:scale-95 transition-all duration-200`}
-        aria-label="Toggle menu"
-      >
-        <div className="relative w-6 h-5 flex flex-col justify-between">
-          <span
-            className={`block h-0.5 w-full transform transition-all duration-300 ease-in-out
-              ${isMobileMenuOpen ? 'rotate-45 translate-y-2.5 bg-white' : 'bg-gray-600'}`}
-          />
-          <span
-            className={`block h-0.5 w-full transition-all duration-300 ease-in-out
-              ${isMobileMenuOpen ? 'opacity-0 bg-white' : 'opacity-100 bg-gray-600'}`}
-          />
-          <span
-            className={`block h-0.5 w-full transform transition-all duration-300 ease-in-out
-              ${isMobileMenuOpen ? '-rotate-45 -translate-y-2 bg-white' : 'bg-gray-600'}`}
-          />
-        </div>
-      </button>
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center px-4 z-[100] shadow-sm">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={`p-2 rounded-lg mr-4
+            ${
+              isMobileMenuOpen
+                ? 'bg-orange-500 text-white'
+                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            }
+            transition-all duration-200`}
+          aria-label="Toggle menu"
+        >
+          <div className="relative w-6 h-5 flex flex-col justify-between">
+            <span
+              className={`block h-0.5 w-full transform transition-all duration-300 ease-in-out
+                ${isMobileMenuOpen ? 'rotate-45 translate-y-2.5 bg-current' : 'bg-current'}`}
+            />
+            <span
+              className={`block h-0.5 w-full transition-all duration-300 ease-in-out
+                ${isMobileMenuOpen ? 'opacity-0 bg-current' : 'opacity-100 bg-current'}`}
+            />
+            <span
+              className={`block h-0.5 w-full transform transition-all duration-300 ease-in-out
+                ${isMobileMenuOpen ? '-rotate-45 -translate-y-2 bg-current' : 'bg-current'}`}
+            />
+          </div>
+        </button>
+        <div className="flex-1 text-center font-semibold text-gray-800">PhantomWriter</div>
+      </div>
 
       {/* Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[90] lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar Navigation */}
       <nav
-        className={`fixed left-0 top-0 h-screen bg-white border-r border-gray flex flex-col shadow-lg z-40 
-          transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        className={`fixed left-0 h-screen bg-white border-r border-gray flex flex-col shadow-lg z-[95]
+         transform transition-transform duration-300 ease-in-out
+         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+         top-16 lg:top-0
+         h-[calc(100vh-4rem)] lg:h-screen
           w-64`}
       >
         {/* Logo, Name, and Stats Section */}

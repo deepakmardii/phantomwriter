@@ -51,7 +51,7 @@ export default function FeedbackPage() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-3xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto py-16 sm:py-8 sm:px-6 lg:px-8">
           <div className="bg-white px-6 py-8 rounded-xl shadow-md border border-gray-200 transition-shadow hover:shadow-lg">
             <div className="text-center">
               <div className="mb-4">
