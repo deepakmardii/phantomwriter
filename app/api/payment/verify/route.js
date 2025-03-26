@@ -47,24 +47,64 @@ export async function POST(request) {
 
     // Update user subscription
     await dbConnect();
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + selectedPlan.duration);
 
-    const user = await User.findByIdAndUpdate(
+    // Get current user
+    const user = await User.findById(authRequest.user._id);
+
+    const now = new Date();
+    const monthlyPostLimit = 45; // Fixed 45 posts per month for all plans
+
+    let subscriptionUpdate = {};
+
+    if (!user.subscription.trialStartedAt) {
+      // Trial period (3 days)
+      const trialEndsAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+      subscriptionUpdate = {
+        status: 'trial',
+        plan: selectedPlan.name.toLowerCase(),
+        trialStartedAt: now,
+        trialEndsAt,
+        expiresAt: trialEndsAt, // During trial, expiry is same as trial end
+      };
+    } else {
+      // Regular subscription - calculate based on plan duration
+      const durationInDays = selectedPlan.duration || 30; // Default to 30 if not specified
+      const expiryDate = new Date(now.getTime() + durationInDays * 24 * 60 * 60 * 1000);
+
+      subscriptionUpdate = {
+        status: 'active',
+        plan: selectedPlan.name.toLowerCase(),
+        expiresAt: expiryDate,
+      };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
       authRequest.user._id,
       {
-        subscription: {
-          status: 'active',
-          expiresAt: expiryDate,
+        subscription: subscriptionUpdate,
+        postUsage: {
+          count: 0, // Reset post count
+          monthlyLimit: monthlyPostLimit,
+          lastResetDate: now,
         },
       },
       { new: true }
     );
 
+    if (!updatedUser) {
+      throw new Error('Failed to update user subscription');
+    }
+
     return NextResponse.json({
       success: true,
-      message: 'Payment verified and subscription activated',
-      subscription: user.subscription,
+      message:
+        user.subscription.status === 'trial'
+          ? 'Trial period activated'
+          : 'Payment verified and subscription activated',
+      subscription: updatedUser.subscription,
+      postUsage: updatedUser.postUsage,
+      expiresAt: updatedUser.subscription.expiresAt,
+      trialEndsAt: updatedUser.subscription.trialEndsAt,
     });
   } catch (error) {
     console.error('Payment verification error:', error);

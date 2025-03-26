@@ -7,12 +7,42 @@ import { useNotification } from '@/app/providers/NotificationProvider';
 // import { useRefreshPosts } from '@/app/hooks/useRefreshPosts';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import LinkedInShareModal from '@/app/components/LinkedInShareModal';
+import TrialModal from '@/app/components/TrialModal';
 
 export default function Dashboard() {
   const router = useRouter();
   const { isAuthenticated, token } = useAuth();
   const { showNotification } = useNotification();
-  // const { refresh:_ } = useRefreshPosts(); // Only destructure if needed later
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [userSubscription, setUserSubscription] = useState(null);
+
+  // Fetch user subscription status
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchSubscription = async () => {
+      try {
+        const response = await fetch('/api/user/subscription', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          setUserSubscription(data.subscription);
+          // Show trial modal if user has no subscription
+          if (!data.subscription || data.subscription.status === 'free') {
+            setShowTrialModal(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+      }
+    };
+
+    fetchSubscription();
+  }, [token]);
 
   const [formData, setFormData] = useState({
     topic: '',
@@ -87,6 +117,18 @@ export default function Dashboard() {
     try {
       if (!token) {
         throw new Error('No authentication token found');
+      }
+
+      // Check subscription status
+      if (!userSubscription || userSubscription.status === 'free') {
+        setShowTrialModal(true);
+        throw new Error('Please start your free trial to continue');
+      }
+
+      // Check if trial/subscription has expired
+      if (userSubscription.expiresAt && new Date(userSubscription.expiresAt) < new Date()) {
+        router.push('/subscription');
+        throw new Error('Your trial/subscription has expired');
       }
 
       const res = await fetch('/api/posts/generate', {
@@ -594,6 +636,8 @@ export default function Dashboard() {
           isSharing={sharingPost === currentPost?._id}
         />
       )}
+
+      <TrialModal isOpen={showTrialModal} onClose={() => setShowTrialModal(false)} />
     </div>
   );
 }

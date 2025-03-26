@@ -45,11 +45,22 @@ const userSchema = new mongoose.Schema({
   subscription: {
     status: {
       type: String,
-      enum: ['free', 'active', 'expired'],
+      enum: ['free', 'trial', 'active', 'expired'],
       default: 'free',
     },
     expiresAt: {
       type: Date,
+    },
+    trialStartedAt: {
+      type: Date,
+    },
+    trialEndsAt: {
+      type: Date,
+    },
+    plan: {
+      type: String,
+      enum: ['none', 'monthly', 'yearly'],
+      default: 'none',
     },
   },
   postUsage: {
@@ -63,7 +74,7 @@ const userSchema = new mongoose.Schema({
     },
     monthlyLimit: {
       type: Number,
-      default: 50,
+      default: 0, // No free credits
     },
   },
   createdAt: {

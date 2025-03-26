@@ -31,14 +31,21 @@ export default function MiniUsageStats() {
     return null;
   }
 
-  const { postUsage = { count: 0, monthlyLimit: 50 }, subscription = { status: 'free' } } =
+  const { postUsage = { count: 0, monthlyLimit: 0 }, subscription = { status: 'free' } } =
     userStats;
-  const remainingPosts = postUsage.monthlyLimit - postUsage.count;
+
+  const getUsageDisplay = () => {
+    if (subscription.status === 'free') {
+      return 'Start Free Trial';
+    }
+    const remainingPosts = postUsage.monthlyLimit - postUsage.count;
+    return `${remainingPosts} posts remaining`;
+  };
 
   return (
     <div className="px-4 py-2 text-sm">
       <div className="flex items-center justify-between text-gray-600">
-        <span>{remainingPosts} posts remaining</span>
+        <span>{getUsageDisplay()}</span>
         <span className="capitalize">{subscription.status}</span>
       </div>
     </div>

@@ -20,9 +20,26 @@ export async function GET(_request) {
       return errorResponse('User not found', 404);
     }
 
+    // Check if trial has expired
+    if (
+      user.subscription.status === 'trial' &&
+      user.subscription.expiresAt &&
+      new Date(user.subscription.expiresAt) < new Date()
+    ) {
+      // Update user subscription status to expired
+      user.subscription.status = 'expired';
+      await user.save();
+    }
+
+    // Set appropriate usage limits based on subscription status
+    const postUsage = {
+      ...user.postUsage,
+      monthlyLimit: user.subscription.status === 'active' ? user.postUsage.monthlyLimit : 0, // No limit for free/expired users
+    };
+
     return successResponse({
       stats: {
-        postUsage: user.postUsage,
+        postUsage,
         subscription: user.subscription,
       },
     });

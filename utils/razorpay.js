@@ -1,4 +1,5 @@
 import Razorpay from 'razorpay';
+const { createHmac } = require('crypto');
 
 let razorpay;
 
@@ -48,13 +49,14 @@ export async function createOrder(amount) {
 
 export function validatePaymentSignature(orderId, paymentId, signature) {
   const text = orderId + '|' + paymentId;
-  const generated_signature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+  const generated_signature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
     .update(text)
     .digest('hex');
 
   return generated_signature === signature;
 }
+
+export const TRIAL_DURATION = 3; // 3 days trial
 
 export const SUBSCRIPTION_PLANS = {
   monthly: {
@@ -62,11 +64,31 @@ export const SUBSCRIPTION_PLANS = {
     duration: 30,
     name: 'Monthly Plan',
     savings: null,
+    postsLimit: 45,
+    trialEnabled: true,
+    description: '3-day free trial, then $49/month for 45 AI-generated posts',
   },
   yearly: {
     price: 299,
     duration: 365,
     name: 'Yearly Plan',
     savings: '50% off',
+    postsLimit: 45,
+    trialEnabled: true,
+    description: '3-day free trial, then $299/year for 45 AI-generated posts per month',
   },
 };
+
+export function calculateTrialEndDate() {
+  const trialEnd = new Date();
+  trialEnd.setDate(trialEnd.getDate() + TRIAL_DURATION);
+  return trialEnd;
+}
+
+export function isTrialExpired(trialStartDate) {
+  if (!trialStartDate) return true;
+  const now = new Date();
+  const trialEnd = new Date(trialStartDate);
+  trialEnd.setDate(trialEnd.getDate() + TRIAL_DURATION);
+  return now >= trialEnd;
+}
