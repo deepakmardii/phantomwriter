@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function TrialModal({ isOpen, onClose }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   if (!isOpen) return null;
 

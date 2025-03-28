@@ -90,15 +90,15 @@ export async function POST(request) {
               linkedinId: linkedinId,
             });
 
-            const updateResult = await Post.findByIdAndUpdate(
-              post._id,
-              {
-                isPublished: true,
-                publishedAt: new Date(),
-                linkedinPostId: linkedinId || 'duplicate-post',
-              },
-              { new: true }
-            );
+            // const updateResult = await Post.findByIdAndUpdate(
+            //   post._id,
+            //   {
+            //     isPublished: true,
+            //     publishedAt: new Date(),
+            //     linkedinPostId: linkedinId || 'duplicate-post',
+            //   },
+            //   { new: true }
+            // );
 
             results.push({
               postId: post._id,

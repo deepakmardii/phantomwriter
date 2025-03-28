@@ -14,7 +14,7 @@ export default function LayoutWrapper({ children }) {
       <main
         className={`flex-1 transition-[margin] duration-300 ease-in-out
           ${user && !isAdminRoute ? 'lg:ml-64' : ''}
-          p-4 lg:p-8`}
+          `}
       >
         {children}
       </main>
